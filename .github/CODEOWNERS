@@ -1,0 +1,15 @@
+# CODEOWNERS for TravelGenie
+
+# Global owners (will be requested for review if no other rule matches)
+* @Prachi @Jiya @Hitanshi
+
+# Frontend
+/frontend/ @Jiya
+
+# Backend & Database
+/backend/ @Jiya @Hitanshi
+/database/ @Hitanshi
+
+# Documentation
+/docs/ @Prachi
+/*.md @Prachi
