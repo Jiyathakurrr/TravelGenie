@@ -131,9 +131,6 @@ See [TEAM_ROLES.md](TEAM_ROLES.md) for detailed responsibilities.
 - Mobile application development (React Native).
 - Offline mode for viewing itineraries while traveling.
 
-## Screenshots
-
-*(Screenshots of the Trip Planner, Chatbot Interface, and Booking Module will be inserted here upon MVP completion)*
 
 ## FAQ
 
