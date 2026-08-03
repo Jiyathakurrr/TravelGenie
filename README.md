@@ -30,22 +30,21 @@ Welcome to **TravelGenie**, an AI-powered travel planning platform designed to r
 
 ```mermaid
 graph TD
-    Client[Next.js Frontend] --> |API Requests| Server[Express.js Backend]
+    Client[Next.js App Router (Frontend)] --> |API Routes| Server[Next.js API Handlers]
     Server --> |Auth & DB Queries| DB[(Supabase PostgreSQL)]
-    Server --> |AI Prompts| AI[OpenAI API]
+    Server --> |AI Prompts| AI[Kimi API (Moonshot AI)]
     Client --> |Conversational Edits| Chatbot[AI Chatbot Module]
-    Chatbot --> Server
 ```
 *For a detailed high-level architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).*
 
 ## Technology Stack
 
-- **Frontend:** Next.js, React, Tailwind CSS, TypeScript
-- **Backend:** Node.js, Express.js
+- **Frontend & API:** Next.js 14 (App Router), React, Tailwind CSS, TypeScript
 - **Database:** Supabase PostgreSQL
 - **Authentication:** Supabase Auth
-- **AI Integration:** OpenAI API
-- **Deployment:** Vercel (Frontend), Render (Backend), Supabase (Database)
+- **AI Integration:** Kimi API (Moonshot AI)
+- **Deployment:** Vercel (Hobby Tier)
+- **Payments:** Razorpay Test Mode (Simulated Checkout)
 
 ## Folder Structure
 
@@ -81,7 +80,8 @@ Please refer to our detailed [ROADMAP.md](ROADMAP.md) and [PROJECT_PLAN.md](PROJ
 - npm or yarn
 - Git
 - Supabase account & project setup
-- OpenAI API Key
+- Kimi API Key (Moonshot AI)
+- Razorpay Test Credentials
 
 ### Setup Steps
 1. **Clone the repository:**

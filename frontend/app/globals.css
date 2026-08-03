@@ -1,0 +1,65 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap");
+@import "tailwindcss";
+
+@theme inline {
+  /* ─── Color Palette ─────────────────────────────────────── */
+  --color-sand:        #EACEAA;   /* dominant background */
+  --color-sand-light:  #F5E8D4;   /* lighter sand for cards */
+  --color-sand-dark:   #D9B88A;   /* border / subtle dividers */
+  --color-terra:       #85431E;   /* primary / headings / CTAs */
+  --color-terra-dark:  #6A3416;   /* hover state for terra */
+  --color-caramel:     #D39858;   /* secondary accent / highlights */
+  --color-caramel-dark:#B87E3A;   /* hover for caramel */
+  --color-ink:         #2C1A0E;   /* body text (warm near-black) */
+  --color-ink-muted:   #6B4226;   /* muted / caption text */
+  --color-surface:     #FBF4EA;   /* card / panel surfaces */
+  --color-white:       #FFFFFF;
+
+  /* ─── Typography ────────────────────────────────────────── */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+
+  /* ─── Spacing & Shape ───────────────────────────────────── */
+  --radius-card:  1rem;
+  --radius-btn:   0.625rem;
+  --shadow-card:  0 4px 24px rgba(133, 67, 30, 0.08);
+  --shadow-lift:  0 8px 32px rgba(133, 67, 30, 0.14);
+}
+
+/* ─── Base reset ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-sand);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Display headings ───────────────────────────────────── */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--color-terra);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+/* ─── Scrollbar (subtle warm) ────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-sand); }
+::-webkit-scrollbar-thumb { background: var(--color-sand-dark); border-radius: 999px; }
+
+/* ─── Selection ──────────────────────────────────────────── */
+::selection {
+  background-color: var(--color-caramel);
+  color: var(--color-white);
+}
