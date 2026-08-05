@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TravelGenie — Your AI Travel Companion",
+  title: "Travel Genie — Your AI-Powered Travel Companion",
   description:
-    "Plan smarter trips with TravelGenie. AI-powered itineraries, budget-aware suggestions, and seamless booking — all in a warm, conversational interface.",
-  keywords: ["travel", "AI itinerary", "trip planning", "travel chatbot"],
+    "Plan smarter trips with Travel Genie. AI-powered itineraries, budget-aware suggestions, and seamless booking — beautifully crafted travel experiences.",
+  keywords: ["travel", "AI itinerary", "trip planning", "travel chatbot", "India travel"],
   openGraph: {
-    title: "TravelGenie",
-    description: "Your AI Travel Companion",
+    title: "Travel Genie",
+    description: "Your AI-Powered Travel Companion",
     type: "website",
   },
 };

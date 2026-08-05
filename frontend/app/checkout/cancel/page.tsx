@@ -1,14 +1,12 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
-import { Lock } from "lucide-react";
+import { XCircle } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "My Bookings — Travel Genie" };
+export const metadata: Metadata = { title: "Booking Cancelled — Travel Genie" };
 
-export default function BookingsPage() {
-  // Auth check and booking fetch happens client-side in Phase 2.
-  // For now, rendering a clean placeholder with login prompt.
+export default function CheckoutCancelPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--color-cream)" }}>
       <Navbar />
@@ -17,28 +15,23 @@ export default function BookingsPage() {
           className="max-w-md w-full p-12 rounded-[var(--radius-xl)] text-center"
           style={{ backgroundColor: "var(--color-white)", border: "1px solid var(--color-border)", boxShadow: "var(--shadow-lg)" }}
         >
-          <div
-            className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-6"
-            style={{ backgroundColor: "var(--color-cream)", color: "var(--color-accent)" }}
-          >
-            <Lock size={24} />
-          </div>
+          <XCircle size={56} className="mx-auto mb-6" style={{ color: "#BA2525" }} />
           <h1 className="text-3xl mb-3" style={{ fontFamily: "var(--font-display)" }}>
-            My Bookings
+            Payment Cancelled
           </h1>
           <p className="text-sm mb-8" style={{ color: "var(--color-secondary)" }}>
-            Sign in to view your saved itineraries and past bookings.
+            Your booking was not completed. No payment was processed. You can try again anytime.
           </p>
           <div className="flex flex-col gap-3">
             <Link
-              href="/login"
+              href="/plan"
               className="w-full py-3 rounded-[var(--radius-md)] text-sm font-semibold text-center transition-all active:scale-95"
               style={{ backgroundColor: "var(--color-accent)", color: "white" }}
             >
-              Sign In
+              Back to Planning
             </Link>
-            <Link href="/signup" className="text-sm font-medium" style={{ color: "var(--color-accent)" }}>
-              Create an account →
+            <Link href="/" className="text-sm font-medium" style={{ color: "var(--color-secondary)" }}>
+              Go to Home
             </Link>
           </div>
         </div>

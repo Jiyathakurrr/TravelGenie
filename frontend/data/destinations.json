@@ -1,0 +1,74 @@
+[
+  {
+    "slug": "goa",
+    "name": "Goa",
+    "tagline": "Sun, Sand & Portuguese Charm",
+    "description": "Indulge in sun-kissed beaches, historic Portuguese architecture, vibrant night markets, and authentic Goan seafood along India's western coastline.",
+    "heroImage": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=1200&q=80&auto=format",
+    "rating": 4.8,
+    "reviewCount": 1240,
+    "startingPriceINR": 12500,
+    "bestTimeToVisit": "Nov - Feb",
+    "experiences": ["Beach Hopping", "Water Sports", "Heritage Walks", "Sunset Cruises"]
+  },
+  {
+    "slug": "manali",
+    "name": "Manali",
+    "tagline": "Valley of Gods & Alpine Wonders",
+    "description": "Escape to pine-scented valleys, snow-capped Himalayan peaks, thrilling adventure sports in Solang Valley, and serene mountain monasteries.",
+    "heroImage": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=1200&q=80&auto=format",
+    "rating": 4.9,
+    "reviewCount": 980,
+    "startingPriceINR": 14900,
+    "bestTimeToVisit": "Oct - Jun",
+    "experiences": ["Solang Adventure", "Rohtang Pass", "Old Manali Cafes", "River Rafting"]
+  },
+  {
+    "slug": "kerala",
+    "name": "Kerala (Kochi & Alleppey)",
+    "tagline": "God's Own Country",
+    "description": "Drift through tranquil palm-fringed backwaters on traditional houseboats, rejuvenate with authentic Ayurvedic therapies, and explore colonial Fort Kochi.",
+    "heroImage": "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1200&q=80&auto=format",
+    "rating": 4.9,
+    "reviewCount": 1560,
+    "startingPriceINR": 16500,
+    "bestTimeToVisit": "Sep - Mar",
+    "experiences": ["Backwater Houseboat", "Ayurveda Spa", "Tea Gardens", "Kathakali Shows"]
+  },
+  {
+    "slug": "jaipur",
+    "name": "Jaipur",
+    "tagline": "The Regal Pink City",
+    "description": "Step into a golden era of grand fortresses, majestic palaces, bustling artisanal bazaars, and legendary Rajasthani royal dining.",
+    "heroImage": "https://images.unsplash.com/photo-1477587458883-47145ed94245?w=1200&q=80&auto=format",
+    "rating": 4.7,
+    "reviewCount": 890,
+    "startingPriceINR": 11800,
+    "bestTimeToVisit": "Oct - Mar",
+    "experiences": ["Amer Fort Tour", "City Palace", "Chokhi Dhani", "Bazaar Shopping"]
+  },
+  {
+    "slug": "udaipur",
+    "name": "Udaipur",
+    "tagline": "The Venice of the East",
+    "description": "Marvel at shimmering lakes, grand marble palaces, romantic rooftop dinners, and serene boat rides during golden hour.",
+    "heroImage": "https://images.unsplash.com/photo-1615836245337-f5b9b2303f1c?w=1200&q=80&auto=format",
+    "rating": 4.8,
+    "reviewCount": 750,
+    "startingPriceINR": 13500,
+    "bestTimeToVisit": "Sep - Mar",
+    "experiences": ["Lake Pichola Boat Ride", "Monsoon Palace", "Heritage Walks", "Rooftop Dining"]
+  },
+  {
+    "slug": "rishikesh",
+    "name": "Rishikesh",
+    "tagline": "Yoga Capital & River Adventures",
+    "description": "Experience spiritual serenity along the sacred Ganges River, world-renowned yoga ashrams, and heart-pumping white water rafting.",
+    "heroImage": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1200&q=80&auto=format",
+    "rating": 4.7,
+    "reviewCount": 640,
+    "startingPriceINR": 9500,
+    "bestTimeToVisit": "Sep - May",
+    "experiences": ["Ganga Aarti", "White Water Rafting", "Yoga Retreats", "Cafes & Suspension Bridges"]
+  }
+]

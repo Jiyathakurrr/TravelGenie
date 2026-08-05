@@ -1,6 +1,6 @@
 /**
  * types/chat.ts
- * Shared TypeScript types for the chat and itinerary modules.
+ * Shared TypeScript types for the chat, search, booking, and itinerary modules.
  */
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
@@ -77,4 +77,128 @@ export interface ItineraryApiRequest {
 
 export interface ItineraryApiResponse {
   itinerary: Itinerary;
+}
+
+// ─── Search & Options ─────────────────────────────────────────────────────────
+
+export interface SearchRequest {
+  from: string;
+  to: string;
+  checkIn: string;
+  checkOut: string;
+  travelers: number;
+  budgetINR: number;
+}
+
+export interface FlightOption {
+  id: string;
+  airline: string;
+  from: string;
+  to: string;
+  departureTime: string;
+  arrivalTime: string;
+  duration: string;
+  priceINR: number;
+  class: string;
+}
+
+export interface HotelOption {
+  id: string;
+  name: string;
+  destination: string;
+  starRating: number;
+  pricePerNightINR: number;
+  amenities: string[];
+  description: string;
+  available: boolean;
+}
+
+export interface TrainOption {
+  id: string;
+  trainName: string;
+  trainNumber: string;
+  from: string;
+  to: string;
+  departureTime: string;
+  arrivalTime: string;
+  duration: string;
+  priceINR: {
+    sleeper: number;
+    ac3Tier: number;
+    ac2Tier: number;
+  };
+  available: boolean;
+}
+
+export interface SearchResponse {
+  flights: FlightOption[];
+  hotels: HotelOption[];
+  overBudget: boolean;
+  budgetDiff?: number;
+  trainAlternatives?: TrainOption[];
+}
+
+// ─── Safety & Weather ─────────────────────────────────────────────────────────
+
+export interface SafetyWeatherRequest {
+  destination: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface WeatherDay {
+  date: string;
+  tempMaxC: number;
+  tempMinC: number;
+  precipitationMm: number;
+}
+
+export interface SafetyWeatherResponse {
+  safety: {
+    score: number;
+    message: string;
+    source: string;
+  } | null;
+  weather: WeatherDay[] | null;
+  warnings: string[];
+}
+
+// ─── Checkout & Booking ───────────────────────────────────────────────────────
+
+export interface CheckoutRequest {
+  amount: number;
+  currency: string;
+  receipt: string;
+}
+
+export interface CheckoutResponse {
+  orderId: string;
+  amount: number;
+  currency: string;
+  key: string;
+}
+
+export interface Booking {
+  id: string;
+  itineraryId: string;
+  userId: string;
+  totalINR: number;
+  status: "pending" | "confirmed" | "failed" | "cancelled";
+  razorpayOrderId?: string;
+  createdAt: string;
+}
+
+// ─── Destination ──────────────────────────────────────────────────────────────
+
+export interface Destination {
+  slug: string;
+  name: string;
+  tagline: string;
+  description: string;
+  heroImage: string;
+  rating: number;
+  reviewCount: number;
+  startingPriceINR: number;
+  bestTimeToVisit: string;
+  experiences: string[];
 }

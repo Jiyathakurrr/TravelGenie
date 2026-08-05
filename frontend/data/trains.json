@@ -1,0 +1,82 @@
+[
+  {
+    "id": "tr-mumbai-goa-1",
+    "trainName": "Mandovi Express",
+    "trainNumber": "10103",
+    "from": "Mumbai",
+    "to": "Goa",
+    "departureTime": "07:10",
+    "arrivalTime": "18:45",
+    "duration": "11h 35m",
+    "priceINR": {
+      "sleeper": 480,
+      "ac3Tier": 1280,
+      "ac2Tier": 1820
+    },
+    "available": true
+  },
+  {
+    "id": "tr-mumbai-goa-2",
+    "trainName": "Konkan Kanya Express",
+    "trainNumber": "20111",
+    "from": "Mumbai",
+    "to": "Goa",
+    "departureTime": "23:05",
+    "arrivalTime": "10:00",
+    "duration": "10h 55m",
+    "priceINR": {
+      "sleeper": 510,
+      "ac3Tier": 1340,
+      "ac2Tier": 1910
+    },
+    "available": true
+  },
+  {
+    "id": "tr-delhi-manali-1",
+    "trainName": "Vande Bharat Express (Delhi to Chandigarh)",
+    "trainNumber": "22447",
+    "from": "Delhi",
+    "to": "Manali",
+    "departureTime": "05:50",
+    "arrivalTime": "08:40",
+    "duration": "2h 50m (+ Scenic Bus Transfer)",
+    "priceINR": {
+      "sleeper": 650,
+      "ac3Tier": 1150,
+      "ac2Tier": 1680
+    },
+    "available": true
+  },
+  {
+    "id": "tr-blr-kochi-1",
+    "trainName": "Kanyakumari Express",
+    "trainNumber": "16526",
+    "from": "Bangalore",
+    "to": "Kochi",
+    "departureTime": "20:10",
+    "arrivalTime": "07:15",
+    "duration": "11h 05m",
+    "priceINR": {
+      "sleeper": 420,
+      "ac3Tier": 1120,
+      "ac2Tier": 1600
+    },
+    "available": true
+  },
+  {
+    "id": "tr-mumbai-jaipur-1",
+    "trainName": "Jaipur Superfast Express",
+    "trainNumber": "12955",
+    "from": "Mumbai",
+    "to": "Jaipur",
+    "departureTime": "19:05",
+    "arrivalTime": "12:45",
+    "duration": "17h 40m",
+    "priceINR": {
+      "sleeper": 580,
+      "ac3Tier": 1520,
+      "ac2Tier": 2180
+    },
+    "available": true
+  }
+]

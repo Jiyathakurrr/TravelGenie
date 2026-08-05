@@ -1,0 +1,102 @@
+[
+  {
+    "id": "ht-goa-1",
+    "name": "Sun & Palms Beach Resort",
+    "destination": "Goa",
+    "starRating": 4,
+    "pricePerNightINR": 3500,
+    "amenities": ["Free WiFi", "Swimming Pool", "Beach Access", "Breakfast"],
+    "description": "Relaxing beach resort steps away from Calangute beach with tropical gardens.",
+    "available": true
+  },
+  {
+    "id": "ht-goa-2",
+    "name": "Portuguese Villa Heritage Stay",
+    "destination": "Goa",
+    "starRating": 5,
+    "pricePerNightINR": 7500,
+    "amenities": ["Heritage Architecture", "Private Pool", "Fine Dining", "Spa"],
+    "description": "Restored 19th-century Portuguese estate offering luxury and authentic charm in Fontainebleau.",
+    "available": true
+  },
+  {
+    "id": "ht-goa-3",
+    "name": "Backpacker Haven Hostel & Stays",
+    "destination": "Goa",
+    "starRating": 3,
+    "pricePerNightINR": 1400,
+    "amenities": ["Free WiFi", "Shared Kitchen", "Co-working Space", "Social Lounge"],
+    "description": "Vibrant budget stay for solo travelers and digital nomads near Anjuna.",
+    "available": true
+  },
+  {
+    "id": "ht-manali-1",
+    "name": "Pine Valley Mountain Resort",
+    "destination": "Manali",
+    "starRating": 4,
+    "pricePerNightINR": 4200,
+    "amenities": ["Mountain View", "Fireplace", "Restaurant", "Trekking Desk"],
+    "description": "Cozy mountain retreat surrounded by snow-capped peaks and pine forests.",
+    "available": true
+  },
+  {
+    "id": "ht-manali-2",
+    "name": "Himalayan Chalet & Spa",
+    "destination": "Manali",
+    "starRating": 5,
+    "pricePerNightINR": 8200,
+    "amenities": ["Luxury Spa", "Heated Pool", "Panoramic Terrace", "Valet"],
+    "description": "Five-star luxury lodge in Solang Valley with world-class wellness facilities.",
+    "available": true
+  },
+  {
+    "id": "ht-manali-3",
+    "name": "Old Manali Riverside Inn",
+    "destination": "Manali",
+    "starRating": 3,
+    "pricePerNightINR": 1800,
+    "amenities": ["Free WiFi", "Cafe", "River View", "Pet Friendly"],
+    "description": "Charming wooden lodge along the Beas River with a bohemian cafe.",
+    "available": true
+  },
+  {
+    "id": "ht-kerala-1",
+    "name": "Backwater Spice Palms Resort",
+    "destination": "Kerala",
+    "starRating": 4,
+    "pricePerNightINR": 4800,
+    "amenities": ["Houseboat Cruises", "Ayurvedic Spa", "Infinity Pool", "Organic Restaurant"],
+    "description": "Tranquil retreat along Kumarakom backwaters with traditional Ayurvedic wellness.",
+    "available": true
+  },
+  {
+    "id": "ht-kerala-2",
+    "name": "Fort Kochi Heritage Boutique Hotel",
+    "destination": "Kerala",
+    "starRating": 4,
+    "pricePerNightINR": 5500,
+    "amenities": ["Colonial Architecture", "Art Gallery", "Free WiFi", "Bicycle Rental"],
+    "description": "Restored Dutch colonial mansion located in the heart of historic Fort Kochi.",
+    "available": true
+  },
+  {
+    "id": "ht-jaipur-1",
+    "name": "Royal Haveli & Palace Stay",
+    "destination": "Jaipur",
+    "starRating": 4,
+    "pricePerNightINR": 3900,
+    "amenities": ["Courtyard Pool", "Rooftop Restaurant", "Cultural Shows", "Free Parking"],
+    "description": "Authentic Rajasthani haveli with ornate frescoes and traditional royal hospitality.",
+    "available": true
+  },
+  {
+    "id": "ht-jaipur-2",
+    "name": "The Pink City Grand Palace",
+    "destination": "Jaipur",
+    "starRating": 5,
+    "pricePerNightINR": 9500,
+    "amenities": ["Butler Service", "Heritage Tours", "Royal Dining", "Spa & Wellness"],
+    "description": "Opulent palace hotel offering an unforgettably regal experience.",
+    "available": true
+  }
+]

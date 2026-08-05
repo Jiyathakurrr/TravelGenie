@@ -1,0 +1,123 @@
+[
+  {
+    "id": "fl-mumbai-goa-1",
+    "airline": "IndiGo",
+    "from": "Mumbai",
+    "to": "Goa",
+    "departureTime": "06:15",
+    "arrivalTime": "07:30",
+    "duration": "1h 15m",
+    "priceINR": 3800,
+    "class": "Economy"
+  },
+  {
+    "id": "fl-mumbai-goa-2",
+    "airline": "Air India",
+    "from": "Mumbai",
+    "to": "Goa",
+    "departureTime": "11:00",
+    "arrivalTime": "12:20",
+    "duration": "1h 20m",
+    "priceINR": 4600,
+    "class": "Economy"
+  },
+  {
+    "id": "fl-mumbai-goa-3",
+    "airline": "Vistara",
+    "from": "Mumbai",
+    "to": "Goa",
+    "departureTime": "17:45",
+    "arrivalTime": "19:00",
+    "duration": "1h 15m",
+    "priceINR": 5200,
+    "class": "Economy"
+  },
+  {
+    "id": "fl-delhi-manali-1",
+    "airline": "Alliance Air",
+    "from": "Delhi",
+    "to": "Manali",
+    "departureTime": "07:00",
+    "arrivalTime": "08:25",
+    "duration": "1h 25m",
+    "priceINR": 7500,
+    "class": "Economy"
+  },
+  {
+    "id": "fl-delhi-manali-2",
+    "airline": "IndiGo",
+    "from": "Delhi",
+    "to": "Manali",
+    "departureTime": "14:10",
+    "arrivalTime": "15:40",
+    "duration": "1h 30m",
+    "priceINR": 6800,
+    "class": "Economy"
+  },
+  {
+    "id": "fl-blr-kochi-1",
+    "airline": "IndiGo",
+    "from": "Bangalore",
+    "to": "Kochi",
+    "departureTime": "08:30",
+    "arrivalTime": "09:35",
+    "duration": "1h 05m",
+    "priceINR": 3200,
+    "class": "Economy"
+  },
+  {
+    "id": "fl-blr-kochi-2",
+    "airline": "Air India Express",
+    "from": "Bangalore",
+    "to": "Kochi",
+    "departureTime": "19:15",
+    "arrivalTime": "20:25",
+    "duration": "1h 10m",
+    "priceINR": 2900,
+    "class": "Economy"
+  },
+  {
+    "id": "fl-mumbai-jaipur-1",
+    "airline": "SpiceJet",
+    "from": "Mumbai",
+    "to": "Jaipur",
+    "departureTime": "09:00",
+    "arrivalTime": "10:45",
+    "duration": "1h 45m",
+    "priceINR": 4200,
+    "class": "Economy"
+  },
+  {
+    "id": "fl-mumbai-jaipur-2",
+    "airline": "IndiGo",
+    "from": "Mumbai",
+    "to": "Jaipur",
+    "departureTime": "16:30",
+    "arrivalTime": "18:10",
+    "duration": "1h 40m",
+    "priceINR": 4900,
+    "class": "Economy"
+  },
+  {
+    "id": "fl-delhi-goa-1",
+    "airline": "IndiGo",
+    "from": "Delhi",
+    "to": "Goa",
+    "departureTime": "10:15",
+    "arrivalTime": "12:50",
+    "duration": "2h 35m",
+    "priceINR": 5800,
+    "class": "Economy"
+  },
+  {
+    "id": "fl-blr-jaipur-1",
+    "airline": "Air India",
+    "from": "Bangalore",
+    "to": "Jaipur",
+    "departureTime": "12:00",
+    "arrivalTime": "14:30",
+    "duration": "2h 30m",
+    "priceINR": 6200,
+    "class": "Economy"
+  }
+]
