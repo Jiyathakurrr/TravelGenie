@@ -1,0 +1,26 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "functions": {
+    "app/api/chat/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/itinerary/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/safety-weather/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/search/route.ts": {
+      "maxDuration": 10
+    },
+    "app/api/checkout/route.ts": {
+      "maxDuration": 15
+    },
+    "app/api/webhook/route.ts": {
+      "maxDuration": 10
+    }
+  }
+}

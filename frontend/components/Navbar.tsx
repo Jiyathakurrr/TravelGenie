@@ -1,119 +1,140 @@
 /**
  * components/Navbar.tsx
- * Top navigation bar — clean and minimal, echoing MakeMyTrip's category structure.
+ *
+ * Traavellio-style navigation bar.
+ * - Transparent on top, cream/white bg on scroll
+ * - Logo (DM Serif Display), nav links, "Plan a Trip" CTA
+ * - Mobile hamburger with slide-down panel
  */
 "use client";
 
-import { useState } from "react";
-import { Menu, X, Plane } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
-  { href: "/chat", label: "Plan a Trip" },
-  { href: "/bookings", label: "My Bookings" },
+  { href: "/", label: "Home" },
+  { href: "/destinations", label: "Destinations" },
+  { href: "/about", label: "About" },
+  { href: "/blog", label: "Blog" },
 ];
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <header
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        backgroundColor: "var(--color-surface)",
-        boxShadow: "0 1px 0 var(--color-sand-dark)",
+        backgroundColor: scrolled ? "rgba(250, 248, 240, 0.95)" : "transparent",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
+        borderBottom: scrolled ? "1px solid var(--color-border)" : "1px solid transparent",
       }}
-      className="sticky top-0 z-50"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-20">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
+        <Link href="/" className="flex items-center gap-1 group">
           <span
-            style={{
-              backgroundColor: "var(--color-terra)",
-              color: "var(--color-sand)",
-            }}
-            className="rounded-lg p-1.5 transition-all group-hover:scale-110"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-accent)" }}
+            className="text-2xl tracking-tight"
           >
-            <Plane size={18} />
-          </span>
-          <span
-            style={{ fontFamily: "var(--font-display)", color: "var(--color-terra)" }}
-            className="text-xl font-bold tracking-tight"
-          >
-            TravelGenie
+            Travel Genie
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-10">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
+              className="text-sm font-medium transition-colors duration-200"
               style={{
-                color:
-                  pathname === link.href
-                    ? "var(--color-terra)"
-                    : "var(--color-ink-muted)",
-                fontWeight: pathname === link.href ? 600 : 400,
+                fontFamily: "var(--font-body)",
+                color: pathname === link.href
+                  ? "var(--color-accent)"
+                  : "var(--color-secondary)",
               }}
-              className="text-sm transition-colors hover:text-[var(--color-terra)]"
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-accent)")}
+              onMouseLeave={(e) => {
+                if (pathname !== link.href) e.currentTarget.style.color = "var(--color-secondary)";
+              }}
             >
               {link.label}
             </Link>
           ))}
+
+          {/* CTA Button */}
           <Link
-            href="/chat"
+            href="/plan"
             style={{
-              backgroundColor: "var(--color-terra)",
-              color: "var(--color-sand)",
+              backgroundColor: "var(--color-accent)",
+              color: "var(--color-white)",
               fontFamily: "var(--font-body)",
             }}
-            className="px-5 py-2 rounded-[var(--radius-btn)] text-sm font-semibold
-                       transition-all hover:bg-[var(--color-terra-dark)] hover:shadow-md
+            className="px-6 py-2.5 rounded-full text-sm font-semibold
+                       transition-all duration-200 hover:opacity-90 hover:shadow-[var(--shadow-md)]
                        active:scale-95"
           >
-            Start Planning
+            Plan a Trip
           </Link>
         </nav>
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden p-2"
-          style={{ color: "var(--color-terra)" }}
+          className="md:hidden p-2 -mr-2"
+          style={{ color: "var(--color-primary)" }}
           onClick={() => setMobileOpen((o) => !o)}
-          aria-label="Toggle menu"
+          aria-label="Toggle navigation"
         >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
       {/* Mobile nav panel */}
       {mobileOpen && (
         <div
-          style={{ backgroundColor: "var(--color-surface)", borderTop: "1px solid var(--color-sand-dark)" }}
-          className="md:hidden px-4 pb-4 pt-2 flex flex-col gap-3"
+          style={{
+            backgroundColor: "var(--color-cream)",
+            borderBottom: "1px solid var(--color-border)",
+          }}
+          className="md:hidden px-6 pb-6 pt-2 flex flex-col gap-1"
         >
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              style={{ color: "var(--color-ink)" }}
-              className="text-sm font-medium py-1"
+              className="text-base font-medium py-3"
+              style={{
+                color: pathname === link.href
+                  ? "var(--color-accent)"
+                  : "var(--color-primary)",
+                borderBottom: "1px solid var(--color-border)",
+              }}
               onClick={() => setMobileOpen(false)}
             >
               {link.label}
             </Link>
           ))}
           <Link
-            href="/chat"
-            style={{ backgroundColor: "var(--color-terra)", color: "var(--color-sand)" }}
-            className="px-5 py-2 rounded-[var(--radius-btn)] text-sm font-semibold text-center"
+            href="/plan"
+            style={{
+              backgroundColor: "var(--color-accent)",
+              color: "var(--color-white)",
+            }}
+            className="px-6 py-3 rounded-full text-sm font-semibold text-center mt-3"
             onClick={() => setMobileOpen(false)}
           >
-            Start Planning
+            Plan a Trip
           </Link>
         </div>
       )}
