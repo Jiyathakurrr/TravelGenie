@@ -1,18 +1,92 @@
 /**
  * app/api/chat/route.ts
- * Conversational chatbot endpoint using Kie API (KIE_API_KEY).
  *
- * Implements:
- * 1. Source + Destination entity parsing & ambiguous query handling.
- * 2. Real-time safety scores (general + girls'-trip score) with required disclaimer.
- * 3. Open-Meteo / Weather forecast integration.
- * 4. Context-aware follow-up handling and dynamic itinerary updates.
+ * Travel Genie AI Chatbot Endpoint
+ * - Source/Destination entity extraction (e.g. "from Mumbai to Agra")
+ * - Pre-itinerary missing questions check (People, Days, Dates/Month)
+ * - 3-4 Transport Options with "Plan This" buttons
+ * - Booking window (60-120 days) & Emergency Booking Logic:
+ *   - Train: "Tatkal Emergency Booking"
+ *   - Flight: "Spot Fare / Emergency Flight Booking"
+ *   - Bus: NO emergency booking option
+ * - Safety Card with required disclaimer
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { CHAT_SYSTEM_PROMPT } from "@/lib/prompts";
-import { findDestination, getSafetyAdvisory, generateRouteOptions, DISCLAIMER_NOTE } from "@/lib/db";
+import { findDestination, getSafetyAdvisory, DISCLAIMER_NOTE } from "@/lib/db";
 import { fetchWeather } from "@/lib/weather";
+
+const INDIAN_CITIES = [
+  "Delhi", "Mumbai", "Jaipur", "Goa", "Manali", "Udaipur", "Rishikesh",
+  "Kochi", "Shimla", "Agra", "Varanasi", "Amritsar", "Pondicherry", "Coorg",
+  "Darjeeling", "Mysore", "Hampi", "Andaman", "Ladakh", "Munnar", "Ooty",
+  "Kasol", "Jaisalmer", "Srinagar", "Gangtok", "Bangalore", "Hyderabad",
+  "Kolkata", "Chennai", "Pune", "Ahmedabad"
+];
+
+function extractCities(text: string): { source: string | null; destination: string | null } {
+  let source: string | null = null;
+  let destination: string | null = null;
+
+  // Pattern 1: "from <CityA> to <CityB>" or "from <CityA> heading to <CityB>"
+  const fromToMatch = text.match(/from\s+([a-zA-Z\s]+?)\s+to\s+([a-zA-Z\s]+)/i);
+  if (fromToMatch) {
+    const rawSrc = fromToMatch[1].trim();
+    const rawDst = fromToMatch[2].trim();
+
+    const matchedSrc = INDIAN_CITIES.find(c => c.toLowerCase() === rawSrc.toLowerCase() || rawSrc.toLowerCase().includes(c.toLowerCase()));
+    const matchedDst = INDIAN_CITIES.find(c => c.toLowerCase() === rawDst.toLowerCase() || rawDst.toLowerCase().includes(c.toLowerCase()));
+
+    source = matchedSrc || rawSrc;
+    destination = matchedDst || rawDst;
+    return { source, destination };
+  }
+
+  // Pattern 2: "to <CityB> from <CityA>"
+  const toFromMatch = text.match(/to\s+([a-zA-Z\s]+?)\s+from\s+([a-zA-Z\s]+)/i);
+  if (toFromMatch) {
+    const rawDst = toFromMatch[1].trim();
+    const rawSrc = toFromMatch[2].trim();
+
+    const matchedDst = INDIAN_CITIES.find(c => c.toLowerCase() === rawDst.toLowerCase() || rawDst.toLowerCase().includes(c.toLowerCase()));
+    const matchedSrc = INDIAN_CITIES.find(c => c.toLowerCase() === rawSrc.toLowerCase() || rawSrc.toLowerCase().includes(c.toLowerCase()));
+
+    destination = matchedDst || rawDst;
+    source = matchedSrc || rawSrc;
+    return { source, destination };
+  }
+
+  // Pattern 3: Standalone city mentions
+  const foundCities: string[] = [];
+  INDIAN_CITIES.forEach((city) => {
+    const reg = new RegExp(`\\b${city}\\b`, "i");
+    if (reg.test(text)) {
+      foundCities.push(city);
+    }
+  });
+
+  if (foundCities.length >= 2) {
+    source = foundCities[0];
+    destination = foundCities[1];
+  } else if (foundCities.length === 1) {
+    destination = foundCities[0];
+  }
+
+  return { source, destination };
+}
+
+function extractTripDetails(text: string) {
+  const travelersMatch = text.match(/(\d+)\s*(people|person|traveler|traveller|friend|adult)/i);
+  const daysMatch = text.match(/(\d+)\s*(day|night)/i);
+  const dateMatch = text.match(/(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec|\d{1,2}\/\d{1,2}|\d{4}-\d{2}-\d{2})/i);
+
+  return {
+    travelers: travelersMatch ? parseInt(travelersMatch[1], 10) : null,
+    days: daysMatch ? parseInt(daysMatch[1], 10) : null,
+    dates: dateMatch ? dateMatch[0] : null,
+  };
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,113 +97,135 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "messages array is required" }, { status: 400 });
     }
 
-    const lastMessage = messages[messages.length - 1]?.content || "";
-    const userText = lastMessage.toLowerCase();
+    // Combine all user messages to accumulate context
+    const userMessages = messages.filter((m: { role: string }) => m.role === "user");
+    const fullUserText = userMessages.map((m: { content: string }) => m.content).join(" ");
+    const lastUserMsg = userMessages[userMessages.length - 1]?.content || "";
 
-    // ── Ambiguity Guard ────────────────────────────────────────────────────────
-    const ambiguousPhrases = ["visit there", "take me somewhere", "go there", "nice place", "somewhere scenic", "anywhere"];
-    const isAmbiguous = ambiguousPhrases.some((phrase) => userText.includes(phrase));
+    const { source, destination } = extractCities(fullUserText);
+    const { travelers, days, dates } = extractTripDetails(fullUserText);
 
-    if (isAmbiguous && !userText.match(/delhi|mumbai|goa|jaipur|manali|udaipur|rishikesh|kochi|shimla|agra|varanasi|amritsar|pondicherry|coorg|darjeeling|mysore|hampi|andaman|ladakh|munnar|ooty|kasol/i)) {
+    // ── Ambiguous destination guard ──────────────────────────────────────────
+    if (!destination && (lastUserMsg.includes("visit there") || lastUserMsg.includes("take me somewhere"))) {
       return NextResponse.json({
-        reply: "I'd love to help you plan that! 🌟 Could you specify which city or destination in India you'd like to visit? (For example: Goa, Manali, Jaipur, Kerala, Udaipur, or Ladakh)",
+        reply: "I'd love to help you plan! 🌟 Which city or region in India would you like to visit? (e.g. Goa, Agra, Jaipur, Manali, Kerala, Udaipur)",
         readyToGenerate: false,
       });
     }
 
-    // Extract destination if present
-    const cityMatch = userText.match(/(delhi|mumbai|goa|jaipur|manali|udaipur|rishikesh|kochi|shimla|agra|varanasi|amritsar|pondicherry|coorg|darjeeling|mysore|hampi|andaman|ladakh|munnar|ooty|kasol)/i);
-    const destName = cityMatch ? cityMatch[0] : "Goa";
-    const destInfo = await findDestination(destName);
-    const safetyData = await getSafetyAdvisory(destName);
-    const weatherData = await fetchWeather(destName);
+    // ── Pre-itinerary Key Questions Check ────────────────────────────────────
+    const missing: string[] = [];
+    if (!travelers) missing.push("how many people are travelling");
+    if (!days) missing.push("how many days the trip will be");
+    if (!dates) missing.push("your travel dates or target month");
 
-    // ── Try Kie API ──────────────────────────────────────────────────────────
-    const apiKey = process.env.KIE_API_KEY || "3354583866400447c5d2412922538cff";
-    let apiReply = "";
-
-    try {
-      const kieRes = await fetch("https://api.kie.ai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "deepseek-chat",
-          messages: [
-            { role: "system", content: CHAT_SYSTEM_PROMPT },
-            ...messages.filter((m: { role: string }) => m.role === "user" || m.role === "assistant"),
-          ],
-          temperature: 0.7,
-        }),
+    if (missing.length > 0 && (!destination || missing.length >= 2)) {
+      const destPrompt = destination ? `for your trip to **${destination}**` : "for your trip";
+      return NextResponse.json({
+        reply: `Great choice! To build your perfect itinerary ${destPrompt}, could you share:\n\n` +
+          missing.map((m, idx) => `${idx + 1}. **${m.slice(0, 1).toUpperCase() + m.slice(1)}**`).join("\n") +
+          `\n\n*(For example: "3 people for 4 days in October from ${source || "Mumbai"}")*`,
+        readyToGenerate: false,
       });
-
-      if (kieRes.ok) {
-        const json = await kieRes.json();
-        apiReply = json.choices?.[0]?.message?.content || json.data?.reply || "";
-      }
-    } catch (e) {
-      console.warn("[api/chat] Kie API direct request error:", e);
     }
 
-    // ── Context-aware reply or dynamic structured fallback ────────────────────
-    if (!apiReply) {
-      // Check for quick replies / follow-ups
-      if (userText.includes("safe at night") || userText.includes("night safety")) {
-        apiReply = `🛡️ **Night Safety in ${destInfo?.name || destName}**:\n\n` +
-          `• **General Safety Rating**: ${safetyData.general_safety_score}/5.0\n` +
-          `• **Girls' Trip Safety Rating**: ${safetyData.girls_trip_safety_score}/5.0\n\n` +
-          `**Guidance**: ${destInfo?.safety_note || "Main tourist areas and promenades are well-frequented and safe until 10:00 PM - 11:00 PM."}\n` +
-          `• Use verified cabs (Uber/Ola/hotel taxis) for late-night transport.\n` +
-          `• Stick to illuminated main streets and popular market belts.\n\n` +
-          `*${DISCLAIMER_NOTE}*`;
-      } else if (userText.includes("shorten") || userText.includes("3 days") || userText.includes("shorter")) {
-        apiReply = `⏱️ **Adjusted 3-Day Express Itinerary for ${destInfo?.name || destName}**:\n\n` +
-          `• **Day 1**: Arrival, check-in, and iconic city landmark tour.\n` +
-          `• **Day 2**: Full day highlights & cultural experience.\n` +
-          `• **Day 3**: Morning souvenir shopping & departure.\n\n` +
-          `💰 **Updated Estimated Cost**: ~₹8,500/person (Saved ~25% on accommodation & daily expenses!).`;
-      } else if (userText.includes("food") || userText.includes("dishes") || userText.includes("eat")) {
-        apiReply = `🍽️ **Culinary Highlights in ${destInfo?.name || destName}**:\n\n` +
-          `1. **Local Specialty 1**: Authentic regional thali & traditional preparations.\n` +
-          `2. **Famous Street Food**: Popular local market snacks.\n` +
-          `3. **Top Recommended Cafe/Restaurant**: High-rated local dining spot.\n` +
-          `4. **Dessert**: Famous traditional sweet of ${destInfo?.name || destName}.`;
-      } else if (userText.includes("best month") || userText.includes("when to visit")) {
-        apiReply = `📅 **Best Time to Visit ${destInfo?.name || destName}**:\n\n` +
-          `• **Peak Season**: ${destInfo?.bestTimeToVisit || "October to March"} (Ideal weather, comfortable sightseeing).\n` +
-          `• **Off-Season Benefit**: Monsoon/Summer offers 30-50% discounts on resort stays.`;
-      } else {
-        // Full Itinerary Generation Response
-        const routes = generateRouteOptions("Delhi", destInfo?.name || destName, 2);
-        const wTemp = weatherData?.[0] ? `${weatherData[0].tempMinC}°C – ${weatherData[0].tempMaxC}°C` : "22°C – 30°C";
+    const activeDest = destination || "Goa";
+    const activeSource = source || "Delhi";
+    const activeTravelers = travelers || 2;
+    const activeDays = days || 4;
 
-        apiReply = `Namaste! ✈️ Here is your pan-India travel plan for **${destInfo?.name || destName}**:\n\n` +
-          `--- \n### Option 1 — Flight Option\n` +
-          `**Transport**: ${routes[0].provider} (${routes[0].duration}) · ${routes[0].departureTime} → ${routes[0].arrivalTime}\n` +
-          `• **Price**: ₹${routes[0].costPerPersonINR.toLocaleString("en-IN")}/person (Total: ₹${routes[0].totalCostINR.toLocaleString("en-IN")})\n` +
-          `• **Accommodation**: Heritage Resort/Hotel (${destInfo?.name}) · Deluxe Room · *(estimated availability)*\n\n` +
-          `--- \n### Option 2 — Train Option\n` +
-          `**Transport**: ${routes[1].provider} (${routes[1].duration}) · ${routes[1].departureTime} → ${routes[1].arrivalTime}\n` +
-          `• **Price**: ₹${routes[1].costPerPersonINR.toLocaleString("en-IN")}/person (Total: ₹${routes[1].totalCostINR.toLocaleString("en-IN")})\n` +
-          `• **Accommodation**: Boutique Inn (${destInfo?.name}) · Standard Room · *(estimated availability)*\n\n` +
-          `--- \n### Option 3 — Bus / Cab (Best Value)\n` +
-          `**Transport**: ${routes[2].provider} (${routes[2].duration})\n` +
-          `• **Price**: ₹${routes[2].costPerPersonINR.toLocaleString("en-IN")}/person (Total: ₹${routes[2].totalCostINR.toLocaleString("en-IN")})\n\n` +
-          `### 🌤️ Weather Forecast\n` +
-          `• Expected Range: ${wTemp} · Clear/Partly Cloudy skies · Pack comfortable cottons & light jacket.\n\n` +
-          `### 🛡️ Safety Info Card\n` +
-          `• **General Safety Score**: ${safetyData.general_safety_score} / 5.0\n` +
-          `• **Girls' Trip Safety Score**: ${safetyData.girls_trip_safety_score} / 5.0\n` +
-          `• **Note**: ${safetyData.source_note}\n` +
-          `*${DISCLAIMER_NOTE}*\n\n` +
-          `### 📍 Top Places to Visit\n` +
-          `${(destInfo?.experiences || ["City Center Walk", "Local Bazaars", "Sunset Point"]).map((e) => `• **${e}**: Must-visit attraction (2-3 hrs duration)`).join("\n")}`;
-      }
+    const destInfo = await findDestination(activeDest);
+    const safetyData = await getSafetyAdvisory(activeDest);
+    const weatherData = await fetchWeather(activeDest);
+
+    // ── Check for Quick Replies / Follow-ups ─────────────────────────────────
+    const lowerLast = lastUserMsg.toLowerCase();
+    if (lowerLast.includes("safe at night") || lowerLast.includes("night safety")) {
+      return NextResponse.json({
+        reply: `🛡️ **Night Safety in ${destInfo?.name || activeDest}**:\n\n` +
+          `• **General Safety Score**: ${safetyData.general_safety_score}/5.0\n` +
+          `• **Girls' Trip Safety Score**: ${safetyData.girls_trip_safety_score}/5.0\n\n` +
+          `**Guidance**: ${destInfo?.safety_note || "Main tourist belts are well-policed and active until late evening."}\n` +
+          `• Use verified cabs (Uber/Ola/hotel cabs) for night travel.\n` +
+          `• Stick to well-lit tourist avenues and popular market streets.\n\n` +
+          `*${DISCLAIMER_NOTE}*`,
+        readyToGenerate: false,
+      });
     }
 
-    return NextResponse.json({ reply: apiReply, readyToGenerate: false });
+    if (lowerLast.includes("shorten") || lowerLast.includes("3 days") || lowerLast.includes("shorter")) {
+      return NextResponse.json({
+        reply: `⏱️ **Adjusted 3-Day Express Itinerary: ${activeSource} → ${activeDest}**:\n\n` +
+          `• **Day 1**: Morning arrival from ${activeSource}, hotel check-in, afternoon heritage monuments tour.\n` +
+          `• **Day 2**: Full day highlights & authentic local food tour.\n` +
+          `• **Day 3**: Souvenir shopping in bazaars & return departure to ${activeSource}.\n\n` +
+          `💰 **Estimated Cost**: ~₹${Math.round(activeTravelers * 3800).toLocaleString("en-IN")} total for ${activeTravelers} travellers.`,
+        readyToGenerate: false,
+      });
+    }
+
+    if (lowerLast.includes("food") || lowerLast.includes("dishes") || lowerLast.includes("eat")) {
+      return NextResponse.json({
+        reply: `🍽️ **Top Culinary Highlights in ${activeDest}**:\n\n` +
+          `1. **Local Specialty Thali**: Traditional regional cuisine served with fresh breads & chutneys.\n` +
+          `2. **Famous Street Food**: Popular street snacks in local market centers.\n` +
+          `3. **Iconic Dining Spot**: High-rated heritage restaurant.\n` +
+          `4. **Regional Dessert**: Traditional authentic sweet of ${activeDest}.`,
+        readyToGenerate: false,
+      });
+    }
+
+    // ── Generate Complete Itinerary Options ──────────────────────────────────
+    const flightCostPerson = 4800;
+    const trainCostPerson = 1450;
+    const busCostPerson = 950;
+    const cabTotalCost = 7500;
+
+    const weatherTemp = weatherData?.[0] ? `${weatherData[0].tempMinC}°C – ${weatherData[0].tempMaxC}°C` : "22°C – 31°C";
+
+    const itineraryReply = `Namaste! ✈️ Here are your **${activeDays}-Day Itinerary Options** for **${activeSource} → ${activeDest}** (for **${activeTravelers} travellers**):\n\n` +
+      `📌 *Booking Window Notice: Regular tickets can typically be booked up to 60–120 days (1–2 months) in advance.*\n\n` +
+      `--- \n### ✈️ Option 1 — Flight Option\n` +
+      `• **Route**: Non-stop flight from ${activeSource} to nearest airport for ${activeDest} (2h 15m)\n` +
+      `• **Timings**: Departure 08:30 AM → Arrival 10:45 AM\n` +
+      `• **Regular Fare**: ₹${flightCostPerson.toLocaleString("en-IN")}/person (Total: ₹${(flightCostPerson * activeTravelers).toLocaleString("en-IN")})\n` +
+      `• **Emergency Last-Minute Fare**: *Spot Fare / Emergency Airline Desk Booking* available (premium pricing applies for same-day departure)\n` +
+      `• **Accommodation**: Heritage Resort / 4-Star Hotel (${activeDays} nights) · *(estimated availability)*\n` +
+      `• **Total Trip Estimate**: ₹${((flightCostPerson * activeTravelers) + (3500 * activeDays) + (1000 * activeTravelers * activeDays)).toLocaleString("en-IN")}\n\n` +
+      `👉 **[Plan This Option — Select Flight Plan](/plan?option=flight&dest=${encodeURIComponent(activeDest)})**\n\n` +
+      `--- \n### 🚆 Option 2 — Train Option\n` +
+      `• **Route**: Express Train (3AC Class) from ${activeSource} (${activeDest} junction)\n` +
+      `• **Timings**: Departure 07:15 PM → Arrival 06:45 AM (+1 day)\n` +
+      `• **Regular Fare**: ₹${trainCostPerson.toLocaleString("en-IN")}/person (Total: ₹${(trainCostPerson * activeTravelers).toLocaleString("en-IN")})\n` +
+      `• **Emergency Last-Minute Booking**: ⚡ **IRCTC Tatkal Quota Available** (Opens 1 day prior at 10:00 AM for AC / 11:00 AM for Sleeper)\n` +
+      `• **Accommodation**: Boutique City Hotel (${activeDays} nights) · *(estimated availability)*\n` +
+      `• **Total Trip Estimate**: ₹${((trainCostPerson * activeTravelers) + (2200 * activeDays) + (800 * activeTravelers * activeDays)).toLocaleString("en-IN")}\n\n` +
+      `👉 **[Plan This Option — Select Train Plan](/plan?option=train&dest=${encodeURIComponent(activeDest)})**\n\n` +
+      `--- \n### 🚌 Option 3 — AC Volvo Bus Option\n` +
+      `• **Route**: Direct AC Volvo Sleeper Bus from ${activeSource}\n` +
+      `• **Timings**: Departure 08:00 PM → Arrival 09:00 AM (+1 day)\n` +
+      `• **Fare**: ₹${busCostPerson.toLocaleString("en-IN")}/person (Total: ₹${(busCostPerson * activeTravelers).toLocaleString("en-IN")})\n` +
+      `• *(Note: Buses run on standard seating without emergency Tatkal/Spot quotas)*\n` +
+      `• **Accommodation**: Deluxe Guesthouse (${activeDays} nights) · *(estimated availability)*\n` +
+      `• **Total Trip Estimate**: ₹${((busCostPerson * activeTravelers) + (1600 * activeDays) + (600 * activeTravelers * activeDays)).toLocaleString("en-IN")}\n\n` +
+      `👉 **[Plan This Option — Select Bus Plan](/plan?option=bus&dest=${encodeURIComponent(activeDest)})**\n\n` +
+      `--- \n### 🚗 Option 4 — Private Outstation Cab (Best Value)\n` +
+      `• **Route**: Door-to-door Private SUV Cab from ${activeSource} to ${activeDest}\n` +
+      `• **Timings**: Flexible On-Demand Pickup\n` +
+      `• **Fare**: ₹${cabTotalCost.toLocaleString("en-IN")} total for vehicle (~₹${Math.round(cabTotalCost / activeTravelers).toLocaleString("en-IN")}/person)\n` +
+      `• **Total Trip Estimate**: ₹${(cabTotalCost + (2500 * activeDays) + (700 * activeTravelers * activeDays)).toLocaleString("en-IN")}\n\n` +
+      `👉 **[Plan This Option — Select Cab Plan](/plan?option=cab&dest=${encodeURIComponent(activeDest)})**\n\n` +
+      `### 🌤️ Weather Forecast\n` +
+      `• Expected Range: ${weatherTemp} · Clear/Partly Cloudy skies · Pack comfortable cottons & light layer.\n\n` +
+      `### 🛡️ Safety Info Card\n` +
+      `• **General Safety Score**: ${safetyData.general_safety_score} / 5.0\n` +
+      `• **Girls' Trip Safety Score**: ${safetyData.girls_trip_safety_score} / 5.0\n` +
+      `• **Note**: ${safetyData.source_note}\n` +
+      `*${DISCLAIMER_NOTE}*\n\n` +
+      `### 📍 Top Highlights\n` +
+      `${(destInfo?.experiences || ["Heritage Tour", "Local Markets", "Sunset Point"]).map(e => `• **${e}**: Top-rated experience`).join("\n")}`;
+
+    return NextResponse.json({ reply: itineraryReply, readyToGenerate: true });
   } catch (err: unknown) {
     console.error("[api/chat] Error:", err);
     return NextResponse.json(
