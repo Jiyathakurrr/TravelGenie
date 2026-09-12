@@ -1,44 +1,104 @@
 /**
  * app/plan/page.tsx — AI chatbot and itinerary page (/plan)
- * Full-page conversational interface. Replaces the old /chat page.
+ * Conversational interface powered by Kie API (KIE_API_KEY).
  */
 "use client";
 
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Send, Loader2, Bot, MapPin } from "lucide-react";
+import { Send, Loader2, Bot, MapPin, RotateCcw, ShieldCheck, Clock, Utensils, Calendar } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import ItineraryPanel from "@/components/ItineraryPanel";
-import TransportCard from "@/components/TransportCard";
-import RazorpayPayButton from "@/components/RazorpayPayButton";
-import type { ChatMessage, Itinerary, TripInputs, TrainOption } from "@/types/chat";
+import Link from "next/link";
+
+interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: Date;
+}
 
 function generateId() {
   return Math.random().toString(36).slice(2, 11);
 }
 
-function makeMsg(role: ChatMessage["role"], content: string, itinerary?: Itinerary): ChatMessage {
-  return { id: generateId(), role, content, itinerary, createdAt: new Date() };
+function makeMsg(role: ChatMessage["role"], content: string): ChatMessage {
+  return { id: generateId(), role, content, createdAt: new Date() };
 }
 
-const WELCOME: ChatMessage = makeMsg(
+const WELCOME = makeMsg(
   "assistant",
-  "Namaste! ✈️ I'm Travel Genie — your AI travel companion.\n\nTell me where you'd love to go, your travel dates, how many people are travelling, and your total budget. I'll plan the perfect trip for you!"
+  "Namaste! ✈️ I'm Travel Genie — your pan-India AI travel companion.\n\nTell me your trip plan! Where are you starting from, where would you like to go, travel dates, traveller count, and total budget in INR?\n\nExample: *\"I want to travel from Delhi to Goa for 5 days with 3 friends, budget ₹50,000\"*"
 );
+
+const QUICK_REPLIES = [
+  { label: "Is it safe at night?", query: "Is it safe at night in this destination?", icon: ShieldCheck },
+  { label: "Shorten to 3 days", query: "Can you shorten this itinerary to 3 days?", icon: Clock },
+  { label: "Food & Culinary Spots", query: "Recommend top local food and culinary spots", icon: Utensils },
+  { label: "Best Month to Visit", query: "What is the best month to visit?", icon: Calendar },
+];
+
+function renderContent(text: string) {
+  const lines = text.split("\n");
+  return lines.map((line, i) => {
+    if (line.startsWith("### ")) {
+      return (
+        <h3 key={i} className="font-semibold text-base mt-4 mb-1" style={{ color: "var(--color-accent)" }}>
+          {line.replace("### ", "")}
+        </h3>
+      );
+    }
+    if (line.startsWith("## ")) {
+      return (
+        <h2 key={i} className="font-bold text-lg mt-5 mb-2" style={{ color: "var(--color-primary)" }}>
+          {line.replace("## ", "")}
+        </h2>
+      );
+    }
+    if (line.trim() === "---") {
+      return <hr key={i} className="my-3" style={{ borderColor: "var(--color-border)" }} />;
+    }
+    if (line.includes("**")) {
+      const parts = line.split(/(\*\*[^*]+\*\*)/g);
+      return (
+        <p key={i} className={`${line.startsWith("- ") || line.startsWith("• ") ? "ml-3" : ""} leading-relaxed`}>
+          {parts.map((part, j) =>
+            part.startsWith("**") && part.endsWith("**") ? (
+              <strong key={j}>{part.slice(2, -2)}</strong>
+            ) : (
+              part
+            )
+          )}
+        </p>
+      );
+    }
+    if (line.startsWith("|")) {
+      const cells = line.split("|").filter(Boolean).map((c) => c.trim());
+      const isSeparator = cells.every((c) => /^[-:]+$/.test(c));
+      if (isSeparator) return null;
+      return (
+        <div key={i} className="flex gap-2 text-xs border-b py-1.5" style={{ borderColor: "var(--color-border)" }}>
+          {cells.map((cell, j) => (
+            <span key={j} className={`flex-1 ${j === 0 ? "font-medium" : ""}`}>{cell}</span>
+          ))}
+        </div>
+      );
+    }
+    if (line.trim() === "") return <div key={i} className="h-1" />;
+    return (
+      <p key={i} className={`leading-relaxed ${line.startsWith("- ") || line.startsWith("• ") ? "ml-2" : ""}`}>
+        {line}
+      </p>
+    );
+  });
+}
 
 function PlanPageInner() {
   const searchParams = useSearchParams();
   const prefillDest = searchParams.get("destination") || "";
 
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME]);
-  const [input, setInput] = useState(prefillDest ? `I want to go to ${prefillDest}` : "");
+  const [input, setInput] = useState(prefillDest ? `I want to travel from Delhi to ${prefillDest}` : "");
   const [isLoading, setIsLoading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [tripInputs, setTripInputs] = useState<Partial<TripInputs>>({});
-  const [trainAlternatives, setTrainAlternatives] = useState<TrainOption[]>([]);
-  const [showTransportCard, setShowTransportCard] = useState(false);
-  const [currentItinerary, setCurrentItinerary] = useState<Itinerary | null>(null);
-  const [isLoggedIn] = useState(false); // Auth Phase 2
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -46,95 +106,14 @@ function PlanPageInner() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  async function generateItinerary(inputs: TripInputs) {
-    setIsGenerating(true);
-    setMessages((prev) => [
-      ...prev,
-      makeMsg("assistant", "✨ Crafting your personalised itinerary… This may take a moment."),
-    ]);
-
-    try {
-      const [itinRes, safetyRes] = await Promise.all([
-        fetch("/api/itinerary", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tripInputs: inputs }),
-        }),
-        fetch("/api/safety-weather", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            destination: inputs.destination,
-            startDate: inputs.startDate,
-            endDate: inputs.endDate,
-          }),
-        }),
-      ]);
-
-      const itinData = await itinRes.json();
-      if (!itinRes.ok) throw new Error(itinData.error ?? "Failed to generate itinerary");
-
-      const itinerary: Itinerary = itinData.itinerary;
-      setCurrentItinerary(itinerary);
-
-      let safetyMsg = "";
-      if (safetyRes.ok) {
-        const safetyData = await safetyRes.json();
-        if (safetyData.safety) {
-          safetyMsg = `\n\n🛡️ **Safety**: ${safetyData.safety.message} (Score: ${safetyData.safety.score}/5)`;
-        }
-        if (safetyData.weather?.[0]) {
-          const w = safetyData.weather[0];
-          safetyMsg += `\n🌤️ **Weather**: ~${w.tempMinC}°C–${w.tempMaxC}°C, ${w.precipitationMm}mm rain expected.`;
-        }
-      }
-
-      // Check budget — search for flights/hotels
-      const searchRes = await fetch("/api/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          from: "Mumbai",
-          to: inputs.destination,
-          checkIn: inputs.startDate,
-          checkOut: inputs.endDate,
-          travelers: inputs.travelers,
-          budgetINR: inputs.budgetINR,
-        }),
-      });
-
-      let overBudgetNote = "";
-      if (searchRes.ok) {
-        const searchData = await searchRes.json();
-        if (searchData.overBudget && searchData.trainAlternatives?.length > 0) {
-          setTrainAlternatives(searchData.trainAlternatives);
-          setShowTransportCard(true);
-          overBudgetNote = "\n\n⚠️ Your estimated transport + hotel costs exceed your budget. I've found some train alternatives below — you choose whether to switch.";
-        }
-      }
-
-      setMessages((prev) => [
-        ...prev,
-        makeMsg(
-          "assistant",
-          `Here's your itinerary for **${itinerary.tripTitle}**! ${safetyMsg}${overBudgetNote}\n\nReview it below and confirm your booking when ready.`,
-          itinerary
-        ),
-      ]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        makeMsg("assistant", `Sorry, something went wrong: ${err instanceof Error ? err.message : "Unknown error"}. Please try again.`),
-      ]);
-    } finally {
-      setIsGenerating(false);
-    }
+  function resetChat() {
+    setMessages([WELCOME]);
+    setInput("");
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const text = input.trim();
-    if (!text || isLoading || isGenerating) return;
+  async function sendQuery(queryText: string) {
+    const text = queryText.trim();
+    if (!text || isLoading) return;
 
     const userMsg = makeMsg("user", text);
     const updated = [...messages, userMsg];
@@ -148,30 +127,36 @@ function PlanPageInner() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: updated.filter((m) => !m.itinerary).map((m) => ({ role: m.role, content: m.content })),
-          tripInputs,
+          messages: updated.map((m) => ({ role: m.role, content: m.content })),
         }),
       });
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Chat error");
 
-      const { reply, tripInputs: newInputs, readyToGenerate } = data;
-      if (newInputs) setTripInputs(newInputs);
-      setMessages((prev) => [...prev, makeMsg("assistant", reply)]);
-
-      if (readyToGenerate && newInputs) {
-        setIsLoading(false);
-        await generateItinerary(newInputs as TripInputs);
+      if (!res.ok) {
+        const errText = data.error ?? `Server error (${res.status})`;
+        setMessages((prev) => [
+          ...prev,
+          makeMsg("assistant", `⚠️ ${errText}`),
+        ]);
         return;
       }
+
+      setMessages((prev) => [...prev, makeMsg("assistant", data.reply)]);
     } catch (err) {
+      const msg = err instanceof Error ? err.message : "Network error";
       setMessages((prev) => [
         ...prev,
-        makeMsg("assistant", `Connection error. Please try again.`),
+        makeMsg("assistant", `⚠️ Could not reach the AI service: ${msg}`),
       ]);
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    sendQuery(input);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -189,13 +174,14 @@ function PlanPageInner() {
 
   return (
     <div
-      className="flex flex-col h-screen"
+      className="flex flex-col h-screen overflow-hidden"
       style={{ backgroundColor: "var(--color-cream)", fontFamily: "var(--font-body)" }}
     >
       <Navbar />
-      {/* Chat area */}
-      <div className="flex-1 overflow-y-auto px-4 pt-24 pb-6 space-y-6">
-        <div className="max-w-3xl mx-auto space-y-6">
+
+      {/* Chat conversation area with padding top to prevent header overlap */}
+      <div className="flex-1 overflow-y-auto px-4 pt-28 pb-6">
+        <div className="max-w-3xl mx-auto space-y-5">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
               {msg.role === "assistant" && (
@@ -206,15 +192,16 @@ function PlanPageInner() {
                   <Bot size={16} />
                 </div>
               )}
-              <div className={`flex flex-col gap-3 ${msg.role === "user" ? "items-end" : "items-start"} max-w-[85%]`}>
+              <div className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"} max-w-[88%]`}>
                 <div
-                  className="px-5 py-3 text-sm leading-relaxed whitespace-pre-wrap"
+                  className="px-5 py-3 text-sm"
                   style={
                     msg.role === "user"
                       ? {
                           backgroundColor: "var(--color-accent)",
                           color: "white",
                           borderRadius: "1.25rem 1.25rem 0.25rem 1.25rem",
+                          whiteSpace: "pre-wrap",
                         }
                       : {
                           backgroundColor: "var(--color-white)",
@@ -222,54 +209,21 @@ function PlanPageInner() {
                           border: "1px solid var(--color-border)",
                           borderRadius: "1.25rem 1.25rem 1.25rem 0.25rem",
                           boxShadow: "var(--shadow-sm)",
+                          width: "100%",
                         }
                   }
                 >
-                  {msg.content}
+                  {msg.role === "user" ? (
+                    msg.content
+                  ) : (
+                    <div className="space-y-1">{renderContent(msg.content)}</div>
+                  )}
                 </div>
-                {msg.itinerary && (
-                  <>
-                    <ItineraryPanel itinerary={msg.itinerary} />
-                    {showTransportCard && trainAlternatives.length > 0 && (
-                      <TransportCard
-                        overageINR={msg.itinerary.estimatedCostINR - msg.itinerary.totalBudgetINR}
-                        trainOptions={trainAlternatives}
-                        onConfirmSwitch={(train) => {
-                          setShowTransportCard(false);
-                          setMessages((prev) => [
-                            ...prev,
-                            makeMsg("assistant", `✅ Great choice! Train **${train.trainName}** (₹${train.priceINR.ac3Tier} for 3AC) has been noted. Your booking below reflects the updated transport.`),
-                          ]);
-                        }}
-                        onDecline={() => {
-                          setShowTransportCard(false);
-                          setMessages((prev) => [
-                            ...prev,
-                            makeMsg("assistant", "Understood! Keeping flights as planned. Proceed with booking below."),
-                          ]);
-                        }}
-                      />
-                    )}
-                    {currentItinerary && (
-                      <div className="w-full">
-                        <RazorpayPayButton
-                          itinerary={currentItinerary}
-                          isLoggedIn={isLoggedIn}
-                          onRequireLogin={() =>
-                            setMessages((prev) => [
-                              ...prev,
-                              makeMsg("assistant", "Please log in first to confirm your booking. 🔐\n\nVisit /login to sign in or create an account."),
-                            ])
-                          }
-                        />
-                      </div>
-                    )}
-                  </>
-                )}
               </div>
             </div>
           ))}
-          {(isLoading || isGenerating) && (
+
+          {isLoading && (
             <div className="flex gap-3">
               <div
                 className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
@@ -279,16 +233,38 @@ function PlanPageInner() {
               </div>
               <div
                 className="px-5 py-3 flex items-center gap-2 text-sm"
-                style={{ backgroundColor: "var(--color-white)", border: "1px solid var(--color-border)", borderRadius: "1.25rem 1.25rem 1.25rem 0.25rem" }}
+                style={{
+                  backgroundColor: "var(--color-white)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "1.25rem 1.25rem 1.25rem 0.25rem",
+                }}
               >
                 <Loader2 size={14} className="animate-spin" style={{ color: "var(--color-accent)" }} />
-                <span style={{ color: "var(--color-muted)" }}>
-                  {isGenerating ? "Crafting your itinerary…" : "Thinking…"}
-                </span>
+                <span style={{ color: "var(--color-muted)" }}>Travel Genie is planning your trip…</span>
               </div>
             </div>
           )}
           <div ref={bottomRef} />
+        </div>
+      </div>
+
+      {/* Quick reply bar */}
+      <div className="px-4 py-2 bg-[var(--color-cream)] border-t border-[var(--color-border)] overflow-x-auto">
+        <div className="max-w-3xl mx-auto flex items-center gap-2">
+          {QUICK_REPLIES.map((qr) => {
+            const Icon = qr.icon;
+            return (
+              <button
+                key={qr.label}
+                onClick={() => sendQuery(qr.query)}
+                disabled={isLoading}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-[var(--color-border)] bg-[var(--color-white)] text-[var(--color-primary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-all whitespace-nowrap"
+              >
+                <Icon size={12} />
+                <span>{qr.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -303,9 +279,9 @@ function PlanPageInner() {
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Where would you like to travel?"
+            placeholder="Plan a trip (e.g. Delhi to Goa for 5 days with 3 friends, budget ₹50,000)"
             rows={1}
-            disabled={isLoading || isGenerating}
+            disabled={isLoading}
             className="flex-1 px-5 py-3 text-sm rounded-[var(--radius-xl)] resize-none outline-none transition-all"
             style={{
               backgroundColor: "var(--color-cream)",
@@ -316,16 +292,31 @@ function PlanPageInner() {
           />
           <button
             type="submit"
-            disabled={!input.trim() || isLoading || isGenerating}
+            disabled={!input.trim() || isLoading}
             className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95 disabled:opacity-40"
             style={{ backgroundColor: "var(--color-accent)", color: "white" }}
+            aria-label="Send"
           >
             <Send size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={resetChat}
+            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95"
+            style={{ backgroundColor: "var(--color-surface)", color: "var(--color-secondary)", border: "1px solid var(--color-border)" }}
+            title="Start new chat"
+            aria-label="Reset chat"
+          >
+            <RotateCcw size={16} />
           </button>
         </form>
         <p className="text-xs text-center mt-2" style={{ color: "var(--color-muted)" }}>
           <MapPin size={11} className="inline mr-1" />
-          Enter to send · Shift+Enter for new line
+          Enter to send · Shift+Enter for line break ·{" "}
+          <Link href="/login" style={{ color: "var(--color-accent)" }}>
+            Sign in
+          </Link>{" "}
+          to save itineraries
         </p>
       </div>
     </div>
