@@ -2,14 +2,14 @@
  * components/Navbar.tsx
  *
  * Traavellio-style navigation bar.
- * - Logo (DM Serif Display), nav links, Login/Signup, "Plan a Trip" CTA
+ * - Transparent on top, cream/white bg on scroll
+ * - Logo (DM Serif Display), nav links, "Plan a Trip" CTA
  * - Mobile hamburger with slide-down panel
- * - Supabase auth state awareness
  */
 "use client";
 
 import { useState, useEffect } from "react";
-import { Menu, X, User as UserIcon } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
@@ -24,7 +24,6 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -32,19 +31,6 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  useEffect(() => {
-    async function getAuthUser() {
-      try {
-        const { supabaseBrowser } = await import("@/lib/supabase");
-        const { data } = await supabaseBrowser.auth.getUser();
-        setUser(data.user);
-      } catch (err) {
-        console.error("Navbar auth check error:", err);
-      }
-    }
-    getAuthUser();
-  }, [pathname]);
 
   return (
     <header
@@ -67,7 +53,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-10">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -87,43 +73,6 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-
-          {/* Auth Links */}
-          {user ? (
-            <Link
-              href="/login"
-              className="text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-              style={{
-                backgroundColor: "var(--color-surface)",
-                color: "var(--color-primary)",
-                border: "1px solid var(--color-border)",
-              }}
-            >
-              <UserIcon size={14} />
-              <span>{user.email?.split("@")[0]}</span>
-            </Link>
-          ) : (
-            <div className="flex items-center gap-4">
-              <Link
-                href="/login"
-                className="text-sm font-medium transition-colors duration-200"
-                style={{
-                  color: pathname === "/login" ? "var(--color-accent)" : "var(--color-secondary)",
-                }}
-              >
-                Log In
-              </Link>
-              <Link
-                href="/signup"
-                className="text-sm font-medium transition-colors duration-200"
-                style={{
-                  color: pathname === "/signup" ? "var(--color-accent)" : "var(--color-secondary)",
-                }}
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
 
           {/* CTA Button */}
           <Link
