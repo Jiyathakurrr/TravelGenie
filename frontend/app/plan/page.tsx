@@ -6,7 +6,7 @@
 
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Send, Loader2, Bot, MapPin, RotateCcw, ShieldCheck, Clock, Utensils, Calendar } from "lucide-react";
+import { Send, Loader2, Bot, MapPin, RotateCcw, ShieldCheck, Clock, Utensils, Calendar, CheckCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
@@ -27,7 +27,7 @@ function makeMsg(role: ChatMessage["role"], content: string): ChatMessage {
 
 const WELCOME = makeMsg(
   "assistant",
-  "Namaste! ✈️ I'm Travel Genie — your pan-India AI travel companion.\n\nTell me your trip plan! Where are you starting from, where would you like to go, travel dates, traveller count, and total budget in INR?\n\nExample: *\"I want to travel from Delhi to Goa for 5 days with 3 friends, budget ₹50,000\"*"
+  "Namaste! ✈️ I'm Travel Genie — your pan-India AI travel companion.\n\nTell me your trip plan! Where are you starting from, where would you like to go, travel dates, traveller count, and total budget in INR?\n\nExample: *\"I want to travel from Mumbai to Agra for 4 days with 2 friends, budget ₹40,000\"*"
 );
 
 const QUICK_REPLIES = [
@@ -37,9 +37,26 @@ const QUICK_REPLIES = [
   { label: "Best Month to Visit", query: "What is the best month to visit?", icon: Calendar },
 ];
 
-function renderContent(text: string) {
+function renderContent(text: string, onSelectPlan?: (planTitle: string) => void) {
   const lines = text.split("\n");
   return lines.map((line, i) => {
+    // Action Plan Buttons: 👉 [Plan This Option — Select Flight Plan](/plan?option=flight...)
+    if (line.includes("[Plan This Option") || line.includes("👉 [Plan This")) {
+      const match = line.match(/\[(.*?)\]\((.*?)\)/);
+      const buttonLabel = match ? match[1] : "Plan This Option";
+      return (
+        <div key={i} className="my-2">
+          <button
+            onClick={() => onSelectPlan && onSelectPlan(buttonLabel)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold shadow-sm transition-all active:scale-95 text-white"
+            style={{ backgroundColor: "var(--color-accent)" }}
+          >
+            <CheckCircle size={14} />
+            <span>{buttonLabel}</span>
+          </button>
+        </div>
+      );
+    }
     if (line.startsWith("### ")) {
       return (
         <h3 key={i} className="font-semibold text-base mt-4 mb-1" style={{ color: "var(--color-accent)" }}>
@@ -154,6 +171,10 @@ function PlanPageInner() {
     }
   }
 
+  function handleSelectPlan(planTitle: string) {
+    sendQuery(`I want to proceed with: "${planTitle}". Please lock this option and proceed to booking!`);
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     sendQuery(input);
@@ -179,7 +200,7 @@ function PlanPageInner() {
     >
       <Navbar />
 
-      {/* Chat conversation area with padding top to prevent header overlap */}
+      {/* Chat conversation area */}
       <div className="flex-1 overflow-y-auto px-4 pt-28 pb-6">
         <div className="max-w-3xl mx-auto space-y-5">
           {messages.map((msg) => (
@@ -216,7 +237,7 @@ function PlanPageInner() {
                   {msg.role === "user" ? (
                     msg.content
                   ) : (
-                    <div className="space-y-1">{renderContent(msg.content)}</div>
+                    <div className="space-y-1">{renderContent(msg.content, handleSelectPlan)}</div>
                   )}
                 </div>
               </div>
@@ -279,7 +300,7 @@ function PlanPageInner() {
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Plan a trip (e.g. Delhi to Goa for 5 days with 3 friends, budget ₹50,000)"
+            placeholder="Plan a trip (e.g. Mumbai to Agra for 4 days with 2 friends, budget ₹40,000)"
             rows={1}
             disabled={isLoading}
             className="flex-1 px-5 py-3 text-sm rounded-[var(--radius-xl)] resize-none outline-none transition-all"

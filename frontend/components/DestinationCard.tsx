@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Star, MapPin, ArrowUpRight } from "lucide-react";
 import type { Destination } from "@/types/chat";
@@ -6,7 +9,11 @@ interface Props {
   destination: Destination;
 }
 
+const DEFAULT_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&q=80&auto=format";
+
 export default function DestinationCard({ destination }: Props) {
+  const [imgSrc, setImgSrc] = useState(destination.heroImage || DEFAULT_FALLBACK_IMAGE);
+
   return (
     <div
       className="group relative rounded-[var(--radius-lg)] overflow-hidden transition-all duration-300 hover:shadow-[var(--shadow-xl)] hover:-translate-y-1"
@@ -16,10 +23,11 @@ export default function DestinationCard({ destination }: Props) {
       }}
     >
       {/* Image container */}
-      <div className="relative h-64 overflow-hidden">
+      <div className="relative h-64 overflow-hidden bg-gray-100">
         <img
-          src={destination.heroImage}
+          src={imgSrc}
           alt={destination.name}
+          onError={() => setImgSrc(DEFAULT_FALLBACK_IMAGE)}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
@@ -47,7 +55,7 @@ export default function DestinationCard({ destination }: Props) {
           {destination.name}
         </h3>
         <p className="text-xs font-medium tracking-wide text-emerald-800 uppercase mb-3">
-          {destination.tagline}
+          {destination.tagline || "Discover India"}
         </p>
         <p className="text-sm text-gray-600 line-clamp-2 mb-4 leading-relaxed">
           {destination.description}
@@ -55,7 +63,7 @@ export default function DestinationCard({ destination }: Props) {
 
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5 mb-6">
-          {destination.experiences.slice(0, 3).map((exp) => (
+          {(destination.experiences || []).slice(0, 3).map((exp) => (
             <span
               key={exp}
               className="text-[11px] px-2.5 py-0.5 rounded-full bg-[var(--color-surface)] text-gray-700 font-medium"
@@ -70,7 +78,7 @@ export default function DestinationCard({ destination }: Props) {
           <div>
             <span className="text-xs text-gray-500 block">Starting from</span>
             <span className="text-lg font-bold text-[var(--color-accent)]">
-              ₹{destination.startingPriceINR.toLocaleString("en-IN")}
+              ₹{(destination.startingPriceINR || 9500).toLocaleString("en-IN")}
             </span>
           </div>
 
