@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, CheckCircle2 } from "lucide-react";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
@@ -22,7 +25,14 @@ export default function SignupPage() {
       const { supabaseBrowser } = await import("@/lib/supabase");
       const { error: authError } = await supabaseBrowser.auth.signUp({ email, password });
       if (authError) throw authError;
-      setSuccess(true);
+
+      if (data?.session) {
+        // Auto-confirmed in Supabase settings
+        router.push("/bookings");
+      } else {
+        // Confirmation email sent
+        setSuccess(true);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Signup failed.");
     } finally {
