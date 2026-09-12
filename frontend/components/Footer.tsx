@@ -11,7 +11,6 @@ const QUICK_LINKS = [
   { href: "/", label: "Home" },
   { href: "/destinations", label: "Destinations" },
   { href: "/plan", label: "Plan a Trip" },
-  { href: "/about", label: "About Us" },
   { href: "/blog", label: "Blog" },
 ];
 
@@ -53,8 +52,8 @@ export default function Footer() {
               Travel Genie
             </h3>
             <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
-              An AI-powered travel planning platform that crafts personalised itineraries,
-              compares options within your budget, and makes booking seamless.
+              An AI-powered travel planning platform that crafts personalised itineraries across India,
+              compares options within your budget, and makes travel seamless.
             </p>
           </div>
 
@@ -101,16 +100,16 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
-              Contact
+              Contact Us
             </h4>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
                 <MapPin size={16} className="mt-0.5 shrink-0" />
-                <span>University Capstone Project<br />India</span>
+                <span>Mumbai, Maharashtra<br />India</span>
               </li>
               <li className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
                 <Mail size={16} className="shrink-0" />
-                <span>team@travelgenie.dev</span>
+                <span>travelgenie@gmail.com</span>
               </li>
               <li className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
                 <Phone size={16} className="shrink-0" />
@@ -128,10 +127,10 @@ export default function Footer() {
       >
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-            © 2026 Travel Genie · MIT License · A University Capstone Project
+            © 2026 Travel Genie · Mumbai, India
           </p>
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-            Powered by Kimi AI · Payments via Razorpay Test Mode only
+            AI Travel Concierge · Payments via Razorpay Test Mode only
           </p>
         </div>
       </div>

@@ -1,9 +1,10 @@
 /**
  * app/api/chat/route.ts
  *
- * Travel Genie AI Chatbot Endpoint
+ * Travel Genie AI Chatbot Endpoint — powered by Cerebras Llama (OpenAI-compatible API)
  * - Source/Destination entity extraction (e.g. "from Mumbai to Agra")
  * - Pre-itinerary missing questions check (People, Days, Dates/Month)
+ * - Dynamic AI responses via Cerebras for context-specific answers
  * - 3-4 Transport Options with "Plan This" buttons
  * - Booking window (60-120 days) & Emergency Booking Logic:
  *   - Train: "Tatkal Emergency Booking"
@@ -16,6 +17,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { CHAT_SYSTEM_PROMPT } from "@/lib/prompts";
 import { findDestination, getSafetyAdvisory, DISCLAIMER_NOTE } from "@/lib/db";
 import { fetchWeather } from "@/lib/weather";
+import OpenAI from "openai";
 
 const INDIAN_CITIES = [
   "Delhi", "Mumbai", "Jaipur", "Goa", "Manali", "Udaipur", "Rishikesh",
@@ -88,6 +90,46 @@ function extractTripDetails(text: string) {
   };
 }
 
+// Initialize Cerebras client (OpenAI-compatible)
+function getCerebrasClient(): OpenAI | null {
+  const apiKey = process.env.CEREBRAS_API_KEY;
+  if (!apiKey) {
+    console.warn("[chat] CEREBRAS_API_KEY not set");
+    return null;
+  }
+  return new OpenAI({
+    apiKey,
+    baseURL: "https://api.cerebras.ai/v1",
+  });
+}
+
+async function callCerebrasAI(
+  systemPrompt: string,
+  messages: Array<{ role: string; content: string }>,
+  contextNote: string
+): Promise<string | null> {
+  try {
+    const client = getCerebrasClient();
+    if (!client) return null;
+
+    const response = await client.chat.completions.create({
+      model: "gpt-oss-120b",  // Available Cerebras models: gpt-oss-120b, gemma-4-31b, qwen-3.8-27b
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages.map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
+      ],
+      max_tokens: 1500,
+      temperature: 0.7,
+    });
+
+    return response.choices[0]?.message?.content ?? null;
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.error("[chat] Cerebras API error:", errMsg);
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -138,50 +180,102 @@ export async function POST(req: NextRequest) {
     const safetyData = await getSafetyAdvisory(activeDest);
     const weatherData = await fetchWeather(activeDest);
 
-    // ── Check for Quick Replies / Follow-ups ─────────────────────────────────
+    const weatherTemp = weatherData?.[0] ? `${weatherData[0].tempMinC}°C – ${weatherData[0].tempMaxC}°C` : "22°C – 31°C";
+
+    // ── Check for Follow-up Questions — use Cerebras AI for dynamic responses ──
     const lowerLast = lastUserMsg.toLowerCase();
-    if (lowerLast.includes("safe at night") || lowerLast.includes("night safety")) {
-      return NextResponse.json({
-        reply: `🛡️ **Night Safety in ${destInfo?.name || activeDest}**:\n\n` +
-          `• **General Safety Score**: ${safetyData.general_safety_score}/5.0\n` +
-          `• **Girls' Trip Safety Score**: ${safetyData.girls_trip_safety_score}/5.0\n\n` +
-          `**Guidance**: ${destInfo?.safety_note || "Main tourist belts are well-policed and active until late evening."}\n` +
-          `• Use verified cabs (Uber/Ola/hotel cabs) for night travel.\n` +
-          `• Stick to well-lit tourist avenues and popular market streets.\n\n` +
-          `*${DISCLAIMER_NOTE}*`,
-        readyToGenerate: false,
-      });
+    const isFollowUp =
+      lowerLast.includes("safe at night") ||
+      lowerLast.includes("night safety") ||
+      lowerLast.includes("shorten") ||
+      lowerLast.includes("shorter") ||
+      lowerLast.includes("food") ||
+      lowerLast.includes("dishes") ||
+      lowerLast.includes("eat") ||
+      lowerLast.includes("best month") ||
+      lowerLast.includes("photography") ||
+      lowerLast.includes("local transport") ||
+      lowerLast.includes("budget tip") ||
+      lowerLast.includes("what to pack") ||
+      lowerLast.includes("activities") ||
+      lowerLast.includes("places to visit") ||
+      lowerLast.includes("hotels") ||
+      lowerLast.includes("accommodation");
+
+    if (isFollowUp) {
+      // Build contextual system prompt for follow-up
+      const contextSystemPrompt = `${CHAT_SYSTEM_PROMPT}
+
+## CURRENT TRIP CONTEXT
+- Source City: ${activeSource}
+- Destination: ${activeDest}
+- Travellers: ${activeTravelers}
+- Days: ${activeDays}
+- General Safety Score: ${safetyData.general_safety_score}/5.0
+- Girls' Trip Safety Score: ${safetyData.girls_trip_safety_score}/5.0
+- Safety Note: ${safetyData.source_note}
+- Weather: ${weatherTemp}
+- Top Experiences: ${(destInfo?.experiences || []).join(", ")}
+
+Provide a precise, context-specific response for ${activeDest}. Be concrete and accurate — not generic.
+Always end with: *${DISCLAIMER_NOTE}*`;
+
+      const aiReply = await callCerebrasAI(contextSystemPrompt, messages, activeDest);
+
+      if (aiReply) {
+        return NextResponse.json({ reply: aiReply, readyToGenerate: false });
+      }
+
+      // Fallback if Cerebras fails
+      if (lowerLast.includes("safe at night") || lowerLast.includes("night safety")) {
+        return NextResponse.json({
+          reply: `🛡️ **Night Safety in ${destInfo?.name || activeDest}**:\n\n` +
+            `• **General Safety Score**: ${safetyData.general_safety_score}/5.0\n` +
+            `• **Girls' Trip Safety Score**: ${safetyData.girls_trip_safety_score}/5.0\n\n` +
+            `**Guidance**: ${destInfo?.safety_note || "Main tourist belts are well-policed and active until late evening."}\n` +
+            `• Use verified cabs (Uber/Ola/hotel cabs) for night travel.\n` +
+            `• Stick to well-lit tourist avenues and popular market streets.\n\n` +
+            `*${DISCLAIMER_NOTE}*`,
+          readyToGenerate: false,
+        });
+      }
     }
 
-    if (lowerLast.includes("shorten") || lowerLast.includes("3 days") || lowerLast.includes("shorter")) {
-      return NextResponse.json({
-        reply: `⏱️ **Adjusted 3-Day Express Itinerary: ${activeSource} → ${activeDest}**:\n\n` +
-          `• **Day 1**: Morning arrival from ${activeSource}, hotel check-in, afternoon heritage monuments tour.\n` +
-          `• **Day 2**: Full day highlights & authentic local food tour.\n` +
-          `• **Day 3**: Souvenir shopping in bazaars & return departure to ${activeSource}.\n\n` +
-          `💰 **Estimated Cost**: ~₹${Math.round(activeTravelers * 3800).toLocaleString("en-IN")} total for ${activeTravelers} travellers.`,
-        readyToGenerate: false,
-      });
+    // ── Try full dynamic itinerary via Cerebras ────────────────────────────────
+    const itinerarySystemPrompt = `${CHAT_SYSTEM_PROMPT}
+
+## CONTEXT DATA (use this for accurate responses)
+- Route: ${activeSource} → ${activeDest}
+- Travellers: ${activeTravelers} people
+- Duration: ${activeDays} days
+- Travel Dates/Month: ${dates || "not specified"}
+- Expected Weather: ${weatherTemp}
+- General Safety Score: ${safetyData.general_safety_score}/5.0
+- Girls' Trip Safety Score: ${safetyData.girls_trip_safety_score}/5.0
+- Safety Note: ${safetyData.source_note}
+- Top Experiences at ${activeDest}: ${(destInfo?.experiences || ["Heritage Tour", "Local Markets", "Sunset Point"]).join(", ")}
+
+## REQUIRED FORMAT
+Generate the full itinerary with all 4 transport options (Flight, Train, Bus, Private Cab).
+Include realistic Indian pricing in INR.
+Always include the booking window note (60-120 days in advance).
+For trains: mention IRCTC Tatkal emergency option.
+For flights: mention Spot Fare emergency option.
+For buses: NO emergency booking option.
+Include weather forecast, safety card, and top food/places sections.
+Always end with: *${DISCLAIMER_NOTE}*`;
+
+    const aiItinerary = await callCerebrasAI(itinerarySystemPrompt, messages, activeDest);
+
+    if (aiItinerary) {
+      return NextResponse.json({ reply: aiItinerary, readyToGenerate: true });
     }
 
-    if (lowerLast.includes("food") || lowerLast.includes("dishes") || lowerLast.includes("eat")) {
-      return NextResponse.json({
-        reply: `🍽️ **Top Culinary Highlights in ${activeDest}**:\n\n` +
-          `1. **Local Specialty Thali**: Traditional regional cuisine served with fresh breads & chutneys.\n` +
-          `2. **Famous Street Food**: Popular street snacks in local market centers.\n` +
-          `3. **Iconic Dining Spot**: High-rated heritage restaurant.\n` +
-          `4. **Regional Dessert**: Traditional authentic sweet of ${activeDest}.`,
-        readyToGenerate: false,
-      });
-    }
-
-    // ── Generate Complete Itinerary Options ──────────────────────────────────
+    // ── Fallback: Structured template when Cerebras unavailable ──────────────
     const flightCostPerson = 4800;
     const trainCostPerson = 1450;
     const busCostPerson = 950;
     const cabTotalCost = 7500;
-
-    const weatherTemp = weatherData?.[0] ? `${weatherData[0].tempMinC}°C – ${weatherData[0].tempMaxC}°C` : "22°C – 31°C";
 
     const itineraryReply = `Namaste! ✈️ Here are your **${activeDays}-Day Itinerary Options** for **${activeSource} → ${activeDest}** (for **${activeTravelers} travellers**):\n\n` +
       `📌 *Booking Window Notice: Regular tickets can typically be booked up to 60–120 days (1–2 months) in advance.*\n\n` +
@@ -194,7 +288,7 @@ export async function POST(req: NextRequest) {
       `• **Total Trip Estimate**: ₹${((flightCostPerson * activeTravelers) + (3500 * activeDays) + (1000 * activeTravelers * activeDays)).toLocaleString("en-IN")}\n\n` +
       `👉 **[Plan This Option — Select Flight Plan](/plan?option=flight&dest=${encodeURIComponent(activeDest)})**\n\n` +
       `--- \n### 🚆 Option 2 — Train Option\n` +
-      `• **Route**: Express Train (3AC Class) from ${activeSource} (${activeDest} junction)\n` +
+      `• **Route**: Express Train (3AC Class) from ${activeSource} to ${activeDest} junction\n` +
       `• **Timings**: Departure 07:15 PM → Arrival 06:45 AM (+1 day)\n` +
       `• **Regular Fare**: ₹${trainCostPerson.toLocaleString("en-IN")}/person (Total: ₹${(trainCostPerson * activeTravelers).toLocaleString("en-IN")})\n` +
       `• **Emergency Last-Minute Booking**: ⚡ **IRCTC Tatkal Quota Available** (Opens 1 day prior at 10:00 AM for AC / 11:00 AM for Sleeper)\n` +
