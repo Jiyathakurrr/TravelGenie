@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { User } from "@supabase/supabase-js";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -125,6 +126,37 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+
+          {user ? (
+            <Link
+              href="/login"
+              className="text-base font-medium py-3"
+              style={{ color: "var(--color-primary)", borderBottom: "1px solid var(--color-border)" }}
+              onClick={() => setMobileOpen(false)}
+            >
+              My Account ({user.email})
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-base font-medium py-3"
+                style={{ color: "var(--color-primary)", borderBottom: "1px solid var(--color-border)" }}
+                onClick={() => setMobileOpen(false)}
+              >
+                Log In
+              </Link>
+              <Link
+                href="/signup"
+                className="text-base font-medium py-3"
+                style={{ color: "var(--color-primary)", borderBottom: "1px solid var(--color-border)" }}
+                onClick={() => setMobileOpen(false)}
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+
           <Link
             href="/plan"
             style={{
