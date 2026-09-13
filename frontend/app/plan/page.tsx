@@ -9,7 +9,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Send, Loader2, Bot, MapPin, RotateCcw, ShieldCheck, Clock, Utensils, Calendar, CheckCircle, ExternalLink, Lock, LogIn, UserPlus, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import type { User } from "@supabase/supabase-js";
 
 interface ChatMessage {
   id: string;
@@ -133,7 +132,7 @@ function PlanPageInner() {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME]);
   const [input, setInput] = useState(prefillDest ? `I want to travel to ${prefillDest}` : "");
   const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<{ email?: string } | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
 
@@ -141,11 +140,15 @@ function PlanPageInner() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    async function checkAuth() {
+    function checkAuth() {
       try {
-        const { supabaseBrowser } = await import("@/lib/supabase");
-        const { data } = await supabaseBrowser.auth.getUser();
-        setUser(data.user);
+        const token = localStorage.getItem("travelgenie_token");
+        const storedUser = localStorage.getItem("travelgenie_user");
+        if (token && storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else {
+          setUser(null);
+        }
       } catch (err) {
         console.error("Auth check failed:", err);
       }

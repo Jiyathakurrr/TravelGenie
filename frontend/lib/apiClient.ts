@@ -34,4 +34,9 @@ export async function fetchFromBackend(endpoint: string, options: RequestInit = 
   return response;
 }
 
+export const apiClient = async (endpoint: string, options: RequestInit = {}) => {
+  const res = await fetchFromBackend(endpoint, options);
+  return res.json();
+};
+
 export { BASE_URL };

@@ -1,10 +1,10 @@
-/**
+﻿/**
  * components/Navbar.tsx
  *
  * Traavellio-style navigation bar.
  * - Logo (DM Serif Display), nav links, Login/Signup, "Plan a Trip" CTA
  * - Mobile hamburger with slide-down panel
- * - Supabase auth state awareness
+ * - Auth state awareness via backend JWT / localStorage
  */
 "use client";
 
@@ -12,7 +12,6 @@ import { useState, useEffect } from "react";
 import { Menu, X, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -23,7 +22,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<{ email?: string; name?: string } | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -33,11 +32,15 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    async function getAuthUser() {
+    function getAuthUser() {
       try {
-        const { supabaseBrowser } = await import("@/lib/supabase");
-        const { data } = await supabaseBrowser.auth.getUser();
-        setUser(data.user);
+        const token = localStorage.getItem("travelgenie_token");
+        const storedUser = localStorage.getItem("travelgenie_user");
+        if (token && storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else {
+          setUser(null);
+        }
       } catch (err) {
         console.error("Navbar auth check error:", err);
       }
@@ -58,149 +61,58 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-1 group">
           <span
-            style={{ fontFamily: "var(--font-display)", color: "var(--color-accent)" }}
-            className="text-2xl tracking-tight"
+            className="text-2xl font-bold tracking-tight"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-primary)" }}
           >
-            Travel Genie
+            TravelGenie
           </span>
+          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--color-accent)" }} />
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium transition-colors duration-200"
-              style={{
-                fontFamily: "var(--font-body)",
-                color: pathname === link.href
-                  ? "var(--color-accent)"
-                  : "var(--color-secondary)",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-accent)")}
-              onMouseLeave={(e) => {
-                if (pathname !== link.href) e.currentTarget.style.color = "var(--color-secondary)";
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          {/* Auth Links */}
-          {user ? (
-            <Link
-              href="/login"
-              className="text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-              style={{
-                backgroundColor: "var(--color-surface)",
-                color: "var(--color-primary)",
-                border: "1px solid var(--color-border)",
-              }}
-            >
-              <UserIcon size={14} />
-              <span>{user.email?.split("@")[0]}</span>
-            </Link>
-          ) : (
-            <div className="flex items-center gap-4">
+          {NAV_LINKS.map((link) => {
+            const isActive = pathname === link.href;
+            return (
               <Link
-                href="/login"
-                className="text-sm font-medium transition-colors duration-200"
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium transition-colors hover:text-(--color-primary)"
                 style={{
-                  color: pathname === "/login" ? "var(--color-accent)" : "var(--color-secondary)",
+                  color: isActive ? "var(--color-primary)" : "var(--color-muted)",
+                  fontWeight: isActive ? 600 : 500,
                 }}
               >
-                Log In
+                {link.label}
               </Link>
-              <Link
-                href="/signup"
-                className="text-sm font-medium transition-colors duration-200"
-                style={{
-                  color: pathname === "/signup" ? "var(--color-accent)" : "var(--color-secondary)",
-                }}
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
-
-          {/* CTA Button */}
-          <Link
-            href="/plan"
-            style={{
-              backgroundColor: "var(--color-accent)",
-              color: "var(--color-white)",
-              fontFamily: "var(--font-body)",
-            }}
-            className="px-6 py-2.5 rounded-full text-sm font-semibold
-                       transition-all duration-200 hover:opacity-90 hover:shadow-[var(--shadow-md)]
-                       active:scale-95"
-          >
-            Plan a Trip
-          </Link>
+            );
+          })}
         </nav>
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden p-2 -mr-2"
-          style={{ color: "var(--color-primary)" }}
-          onClick={() => setMobileOpen((o) => !o)}
-          aria-label="Toggle navigation"
-        >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
-
-      {/* Mobile nav panel */}
-      {mobileOpen && (
-        <div
-          style={{
-            backgroundColor: "var(--color-cream)",
-            borderBottom: "1px solid var(--color-border)",
-          }}
-          className="md:hidden px-6 pb-6 pt-2 flex flex-col gap-1"
-        >
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-base font-medium py-3"
-              style={{
-                color: pathname === link.href
-                  ? "var(--color-accent)"
-                  : "var(--color-primary)",
-                borderBottom: "1px solid var(--color-border)",
-              }}
-              onClick={() => setMobileOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
-
+        {/* Desktop Actions */}
+        <div className="hidden md:flex items-center gap-4">
           {user ? (
             <Link
-              href="/login"
-              className="text-base font-medium py-3"
-              style={{ color: "var(--color-primary)", borderBottom: "1px solid var(--color-border)" }}
-              onClick={() => setMobileOpen(false)}
+              href="/bookings"
+              className="flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-full transition-colors hover:bg-black/5"
+              style={{ color: "var(--color-primary)" }}
             >
-              My Account ({user.email})
+              <UserIcon size={16} />
+              <span>Bookings</span>
             </Link>
           ) : (
             <>
               <Link
                 href="/login"
-                className="text-base font-medium py-3"
-                style={{ color: "var(--color-primary)", borderBottom: "1px solid var(--color-border)" }}
-                onClick={() => setMobileOpen(false)}
+                className="text-sm font-medium px-3 py-1.5 transition-colors hover:text-(--color-primary)"
+                style={{ color: "var(--color-muted)" }}
               >
                 Log In
               </Link>
               <Link
                 href="/signup"
-                className="text-base font-medium py-3"
-                style={{ color: "var(--color-primary)", borderBottom: "1px solid var(--color-border)" }}
-                onClick={() => setMobileOpen(false)}
+                className="text-sm font-medium px-4 py-2 rounded-full border transition-all hover:bg-black/5"
+                style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
               >
                 Sign Up
               </Link>
@@ -209,15 +121,84 @@ export default function Navbar() {
 
           <Link
             href="/plan"
-            style={{
-              backgroundColor: "var(--color-accent)",
-              color: "var(--color-white)",
-            }}
-            className="px-6 py-3 rounded-full text-sm font-semibold text-center mt-3"
-            onClick={() => setMobileOpen(false)}
+            className="text-sm font-semibold px-5 py-2.5 rounded-full text-white shadow-sm transition-all hover:opacity-95 active:scale-95"
+            style={{ backgroundColor: "var(--color-primary)" }}
           >
             Plan a Trip
           </Link>
+        </div>
+
+        {/* Mobile Hamburger Button */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-black/5 transition-colors"
+          aria-label="Toggle Menu"
+        >
+          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Menu Panel */}
+      {mobileOpen && (
+        <div
+          className="md:hidden px-6 pt-4 pb-6 border-b shadow-lg animate-in slide-in-from-top duration-200"
+          style={{ backgroundColor: "var(--color-bg)", borderColor: "var(--color-border)" }}
+        >
+          <div className="flex flex-col gap-4">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="text-base font-medium py-2 transition-colors"
+                style={{ color: pathname === link.href ? "var(--color-primary)" : "var(--color-muted)" }}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <hr style={{ borderColor: "var(--color-border)" }} />
+
+            {user ? (
+              <Link
+                href="/bookings"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2 text-base font-medium py-2"
+                style={{ color: "var(--color-primary)" }}
+              >
+                <UserIcon size={18} />
+                <span>My Bookings</span>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-4 pt-2">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-base font-medium py-2"
+                  style={{ color: "var(--color-muted)" }}
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileOpen(false)}
+                  className="text-base font-medium px-4 py-2 rounded-full border"
+                  style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+
+            <Link
+              href="/plan"
+              onClick={() => setMobileOpen(false)}
+              className="text-center font-semibold py-3 rounded-full text-white mt-2"
+              style={{ backgroundColor: "var(--color-primary)" }}
+            >
+              Plan a Trip
+            </Link>
+          </div>
         </div>
       )}
     </header>

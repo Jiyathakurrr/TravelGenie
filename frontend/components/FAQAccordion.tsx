@@ -6,7 +6,7 @@ import { Plus, Minus } from "lucide-react";
 const FAQS = [
   {
     q: "Is Travel Genie free to use?",
-    a: "Yes, planning your trip — chatting with the AI, generating itineraries, and exploring destinations — is completely free. A Supabase account is required to save bookings.",
+    a: "Yes, planning your trip — chatting with the AI, generating itineraries, and exploring destinations — is completely free. An account is required to save bookings.",
   },
   {
     q: "Does Travel Genie use real flight and hotel data?",

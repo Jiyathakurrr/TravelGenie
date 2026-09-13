@@ -1,12 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/apiClient";
 
 function LoginContent() {
   const router = useRouter();
@@ -19,17 +19,21 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState("");
-  const [unconfirmedEmail, setUnconfirmedEmail] = useState(false);
-  const [resending, setResending] = useState(false);
-  const [resendSent, setResendSent] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<{ email?: string; name?: string } | null>(null);
 
   useEffect(() => {
-    async function checkSession() {
-      const { supabaseBrowser } = await import("@/lib/supabase");
-      const { data } = await supabaseBrowser.auth.getUser();
-      setUser(data.user);
-      setCheckingSession(false);
+    function checkSession() {
+      try {
+        const token = localStorage.getItem("travelgenie_token");
+        const storedUser = localStorage.getItem("travelgenie_user");
+        if (token && storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (err) {
+        console.error("Session check error:", err);
+      } finally {
+        setCheckingSession(false);
+      }
     }
     checkSession();
   }, []);
@@ -37,8 +41,6 @@ function LoginContent() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    setUnconfirmedEmail(false);
-    setResendSent(false);
 
     if (!email.trim()) {
       setError("Please enter your email.");
@@ -51,201 +53,128 @@ function LoginContent() {
 
     setLoading(true);
     try {
-      const { supabaseBrowser } = await import("@/lib/supabase");
-      const { error: authError } = await supabaseBrowser.auth.signInWithPassword({
-        email: email.trim(),
-        password,
+      const data = await apiClient("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
       });
-      if (authError) throw authError;
 
-      router.push(redirectTarget);
+      if (data.token) {
+        localStorage.setItem("travelgenie_token", data.token);
+        localStorage.setItem("travelgenie_user", JSON.stringify(data.user));
+        router.push(redirectTarget);
+      } else {
+        throw new Error(data.error || "Login failed.");
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Login failed. Please try again.";
-      if (msg.includes("Invalid login credentials")) {
-        setError("Invalid email or password. Please try again.");
-      } else if (msg.includes("Email not confirmed")) {
-        setUnconfirmedEmail(true);
-        setError("Please confirm your email address before logging in. Check your inbox for the verification link.");
-      } else {
-        setError(msg);
-      }
+      setError(msg);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleResendVerification() {
-    if (!email.trim()) return;
-    setResending(true);
-    try {
-      const { supabaseBrowser } = await import("@/lib/supabase");
-      await supabaseBrowser.auth.resend({
-        type: "signup",
-        email: email.trim(),
-      });
-      setResendSent(true);
-    } catch (err) {
-      console.error("Resend error:", err);
-    } finally {
-      setResending(false);
-    }
-  }
-
-  async function handleLogout() {
-    const { supabaseBrowser } = await import("@/lib/supabase");
-    await supabaseBrowser.auth.signOut();
+  function handleLogout() {
+    localStorage.removeItem("travelgenie_token");
+    localStorage.removeItem("travelgenie_user");
     setUser(null);
   }
 
   const inputStyle = {
-    border: "1px solid var(--color-border)",
-    backgroundColor: "var(--color-cream)",
+    backgroundColor: "#FFFFFF",
+    borderColor: "var(--color-border)",
     color: "var(--color-primary)",
   };
 
   if (checkingSession) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--color-cream)" }}>
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
-          <Loader2 size={28} className="animate-spin" style={{ color: "var(--color-accent)" }} />
-        </main>
-      </div>
-    );
-  }
-
-  if (user) {
-    return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--color-cream)" }}>
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center px-6 pt-24 pb-12">
-          <div className="w-full max-w-md">
-            <div
-              className="p-10 rounded-[var(--radius-xl)] text-center"
-              style={{ backgroundColor: "var(--color-white)", border: "1px solid var(--color-border)", boxShadow: "var(--shadow-lg)" }}
-            >
-              <div className="text-5xl mb-4">👋</div>
-              <h1 className="text-2xl mb-2" style={{ fontFamily: "var(--font-display)" }}>
-                Welcome back!
-              </h1>
-              <p className="text-sm mb-2" style={{ color: "var(--color-secondary)" }}>
-                Signed in as
-              </p>
-              <p className="text-sm font-semibold mb-6" style={{ color: "var(--color-primary)" }}>
-                {user.email}
-              </p>
-              <div className="flex flex-col gap-3">
-                <Link
-                  href="/plan"
-                  className="w-full py-3 rounded-[var(--radius-md)] text-sm font-semibold text-center transition-all active:scale-95"
-                  style={{ backgroundColor: "var(--color-accent)", color: "white" }}
-                >
-                  Plan a Trip
-                </Link>
-                <Link
-                  href="/bookings"
-                  className="w-full py-3 rounded-[var(--radius-md)] text-sm font-semibold text-center transition-all active:scale-95"
-                  style={{ backgroundColor: "var(--color-surface)", color: "var(--color-primary)", border: "1px solid var(--color-border)" }}
-                >
-                  View My Bookings
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm font-medium mt-2"
-                  style={{ color: "var(--color-secondary)" }}
-                >
-                  Sign Out
-                </button>
-              </div>
-            </div>
-          </div>
-        </main>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin text-gray-400" size={32} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--color-cream)" }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--color-bg)" }}>
       <Navbar />
-      <main className="flex-1 flex items-center justify-center px-6 pt-24 pb-12">
-        <div className="w-full max-w-md">
-          <div
-            className="p-10 rounded-[var(--radius-xl)]"
-            style={{ backgroundColor: "var(--color-white)", border: "1px solid var(--color-border)", boxShadow: "var(--shadow-lg)" }}
-          >
-            <h1 className="text-3xl mb-1" style={{ fontFamily: "var(--font-display)" }}>
-              Welcome back
+
+      <main className="flex-1 flex items-center justify-center pt-28 pb-16 px-6">
+        <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-sm border" style={{ borderColor: "var(--color-border)" }}>
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold tracking-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-primary)" }}>
+              Welcome Back
             </h1>
-            <p className="text-sm mb-7" style={{ color: "var(--color-secondary)" }}>
-              Sign in to plan, save itineraries, and manage trips.
+            <p className="text-sm mt-2" style={{ color: "var(--color-muted)" }}>
+              Log in to manage your trip itineraries.
             </p>
+          </div>
 
-            {error && (
-              <div
-                className="mb-5 p-3.5 rounded-[var(--radius-sm)] text-sm space-y-2"
-                style={{ backgroundColor: "#FEF2F2", color: "#991B1B", border: "1px solid #FCA5A5" }}
-              >
-                <p>{error}</p>
-                {unconfirmedEmail && (
-                  <div>
-                    {resendSent ? (
-                      <p className="text-xs text-emerald-700 flex items-center gap-1 font-medium mt-1">
-                        <CheckCircle2 size={14} /> Verification email resent! Check your inbox.
-                      </p>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleResendVerification}
-                        disabled={resending}
-                        className="text-xs font-semibold underline hover:opacity-80 mt-1 text-red-900"
-                      >
-                        {resending ? "Resending verification email..." : "Click here to resend verification email"}
-                      </button>
-                    )}
-                  </div>
-                )}
+          {user ? (
+            <div className="text-center py-6 space-y-4">
+              <p className="text-sm font-medium" style={{ color: "var(--color-primary)" }}>
+                You are currently logged in as <span className="font-bold">{user.email || user.name}</span>.
+              </p>
+              <div className="flex justify-center gap-3">
+                <Link
+                  href="/bookings"
+                  className="px-5 py-2.5 rounded-full text-white text-xs font-bold"
+                  style={{ backgroundColor: "var(--color-primary)" }}
+                >
+                  View Bookings
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="px-5 py-2.5 rounded-full border text-xs font-bold text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  Log Out
+                </button>
               </div>
-            )}
-
+            </div>
+          ) : (
             <form onSubmit={handleLogin} className="space-y-4">
+              {error && (
+                <div className="p-3 rounded-lg text-xs font-medium bg-red-50 text-red-600 border border-red-200">
+                  {error}
+                </div>
+              )}
+
               <div>
-                <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "var(--color-secondary)" }}>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--color-muted)" }}>
                   Email Address
                 </label>
                 <input
                   type="email"
+                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  className="w-full px-4 py-3 rounded-[var(--radius-md)] text-sm outline-none"
+                  placeholder="you@gmail.com"
+                  className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-(--color-accent)"
                   style={inputStyle}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "var(--color-secondary)" }}>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--color-muted)" }}>
                   Password
                 </label>
                 <div className="relative">
                   <input
                     type={showPw ? "text" : "password"}
+                    required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="current-password"
-                    className="w-full px-4 py-3 pr-12 rounded-[var(--radius-md)] text-sm outline-none"
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-(--color-accent) pr-10"
                     style={inputStyle}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPw(!showPw)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2"
-                    style={{ color: "var(--color-muted)" }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
@@ -253,22 +182,23 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-[var(--radius-md)] text-sm font-semibold transition-all active:scale-95 disabled:opacity-60 mt-2 text-white"
-                style={{ backgroundColor: "var(--color-accent)" }}
+                className="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-all flex items-center justify-center gap-2 mt-6 shadow-sm active:scale-95"
+                style={{ backgroundColor: "var(--color-primary)" }}
               >
-                {loading ? <Loader2 size={16} className="animate-spin mx-auto" /> : "Sign In"}
+                {loading ? <Loader2 size={18} className="animate-spin" /> : "Log In"}
               </button>
             </form>
+          )}
 
-            <p className="text-sm text-center mt-6" style={{ color: "var(--color-secondary)" }}>
-              No account?{" "}
-              <Link href={`/signup${redirectTarget ? `?redirect=${encodeURIComponent(redirectTarget)}` : ""}`} className="font-semibold" style={{ color: "var(--color-accent)" }}>
-                Create one
-              </Link>
-            </p>
+          <div className="mt-6 text-center text-xs" style={{ color: "var(--color-muted)" }}>
+            Don't have an account?{" "}
+            <Link href="/signup" className="font-semibold underline hover:text-(--color-primary)">
+              Sign Up
+            </Link>
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );
@@ -276,11 +206,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-gray-400" size={32} /></div>}>
       <LoginContent />
     </Suspense>
   );
