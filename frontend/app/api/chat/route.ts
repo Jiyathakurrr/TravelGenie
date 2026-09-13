@@ -1,19 +1,19 @@
 /**
  * app/api/chat/route.ts
  *
- * Travel Genie AI Chatbot Endpoint
- * - Intent & Entity Extraction (Source, Destination, Intent Type)
- * - City Knowledge Base for Varanasi, Amritsar, Mysore, Hampi, Ooty, Goa, Jaipur, Agra, Manali, Delhi, Mumbai, etc.
- * - Context-aware, unique answers for general Q&A, destination info, route queries, and full trip planning.
- * - Honest & realistic travel estimates with explicit disclaimers.
- * - Functional booking search deep links (Google Flights, IRCTC, RedBus, MMT).
+ * Travel Genie AI Chatbot Endpoint — Powered by GroqCloud AI
+ * - Official GroqCloud API Integration (model: openai/gpt-oss-120b)
+ * - Sends full conversation history and user query for context-aware responses
+ * - Supports freestyle travel questions, destination info, route guidance, and structured itineraries
+ * - Graceful fallback to city knowledge base on Groq rate limits (429) or missing keys
+ * - Realistic disclaimers & functional transport search deep links
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { CHAT_SYSTEM_PROMPT } from "@/lib/prompts";
 import { findDestination, getSafetyAdvisory, DISCLAIMER_NOTE } from "@/lib/db";
 import { fetchWeather } from "@/lib/weather";
-import OpenAI from "openai";
+import { getGroqClient, GROQ_PRIMARY_MODEL, GROQ_FALLBACK_MODEL } from "@/lib/groq";
 
 const INDIAN_CITIES = [
   "Delhi", "Mumbai", "Jaipur", "Goa", "Manali", "Udaipur", "Rishikesh",
@@ -23,7 +23,7 @@ const INDIAN_CITIES = [
   "Kolkata", "Chennai", "Pune", "Ahmedabad"
 ];
 
-// Rich fallback knowledge per city
+// Rich fallback knowledge per city when AI API is unavailable
 const CITY_KNOWLEDGE: Record<string, {
   tagline: string;
   bestTime: string;
@@ -145,7 +145,6 @@ function extractCities(text: string): { source: string | null; destination: stri
   let source: string | null = null;
   let destination: string | null = null;
 
-  // Pattern 1: "from <CityA> to <CityB>"
   const fromToMatch = text.match(/from\s+([a-zA-Z\s]+?)\s+to\s+([a-zA-Z\s]+)/i);
   if (fromToMatch) {
     const rawSrc = fromToMatch[1].trim();
@@ -159,7 +158,6 @@ function extractCities(text: string): { source: string | null; destination: stri
     return { source, destination };
   }
 
-  // Pattern 2: "to <CityB> from <CityA>"
   const toFromMatch = text.match(/to\s+([a-zA-Z\s]+?)\s+from\s+([a-zA-Z\s]+)/i);
   if (toFromMatch) {
     const rawDst = toFromMatch[1].trim();
@@ -173,7 +171,6 @@ function extractCities(text: string): { source: string | null; destination: stri
     return { source, destination };
   }
 
-  // Pattern 3: Standalone city mentions
   const foundCities: string[] = [];
   INDIAN_CITIES.forEach((city) => {
     const reg = new RegExp(`\\b${city}\\b`, "i");
@@ -204,38 +201,52 @@ function extractTripDetails(text: string) {
   };
 }
 
-// Check Cerebras AI availability safely
-function getCerebrasClient(): OpenAI | null {
-  const apiKey = process.env.CEREBRAS_API_KEY;
-  if (!apiKey) return null;
-  return new OpenAI({
-    apiKey,
-    baseURL: "https://api.cerebras.ai/v1",
-  });
-}
-
-async function callCerebrasAI(
+/**
+ * Call official GroqCloud API with primary model (openai/gpt-oss-120b)
+ * and fallback to llama-3.3-70b-versatile on rate limits (429) or model errors.
+ */
+async function callGroqAI(
   systemPrompt: string,
   messages: Array<{ role: string; content: string }>
 ): Promise<string | null> {
-  try {
-    const client = getCerebrasClient();
-    if (!client) return null;
+  const client = getGroqClient();
+  if (!client) return null;
 
+  // Explicitly type role as "system" | "user" | "assistant" for OpenAI SDK compatibility
+  const formattedMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+    { role: "system", content: systemPrompt },
+    ...messages.map((m) => ({
+      role: (m.role === "user" ? "user" : "assistant") as "user" | "assistant",
+      content: m.content,
+    })),
+  ];
+
+  try {
     const response = await client.chat.completions.create({
-      model: "llama3.1-8b",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...messages.map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
-      ],
-      max_tokens: 1200,
+      model: GROQ_PRIMARY_MODEL,
+      messages: formattedMessages,
+      max_tokens: 1400,
       temperature: 0.7,
     });
 
     return response.choices[0]?.message?.content ?? null;
-  } catch (err) {
-    // Graceful fallback to static Knowledge Base
-    return null;
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.warn(`[groq] Primary model (${GROQ_PRIMARY_MODEL}) call failed: ${errMsg}. Trying fallback model...`);
+
+    try {
+      const fallbackResponse = await client.chat.completions.create({
+        model: GROQ_FALLBACK_MODEL,
+        messages: formattedMessages,
+        max_tokens: 1400,
+        temperature: 0.7,
+      });
+      return fallbackResponse.choices[0]?.message?.content ?? null;
+    } catch (fallbackErr: unknown) {
+      const fbMsg = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+      console.error(`[groq] Fallback model (${GROQ_FALLBACK_MODEL}) call also failed: ${fbMsg}`);
+      return null;
+    }
   }
 }
 
@@ -256,7 +267,40 @@ export async function POST(req: NextRequest) {
     const { source, destination } = extractCities(fullUserText);
     const { travelers, days, dates } = extractTripDetails(fullUserText);
 
-    // ── INTENT CLASSIFICATION ────────────────────────────────────────────────
+    const activeDest = destination || "Goa";
+    const activeSource = source || "Mumbai";
+    const activeTravelers = travelers || 2;
+    const activeDays = days || 4;
+
+    const destInfo = await findDestination(activeDest);
+    const safetyData = await getSafetyAdvisory(activeDest);
+    const weatherData = await fetchWeather(activeDest);
+    const weatherTemp = weatherData?.[0] ? `${weatherData[0].tempMinC}°C – ${weatherData[0].tempMaxC}°C` : "22°C – 31°C";
+
+    // ── 1. TRY DYNAMIC GROQ AI RESPONSE FOR ALL QUESTIONS ───────────────────
+    const systemPromptWithContext = `${CHAT_SYSTEM_PROMPT}
+
+## ACTIVE TRIP CONTEXT
+- Origin City: ${activeSource}
+- Target Destination: ${activeDest}
+- Travellers: ${activeTravelers} people
+- Trip Duration: ${activeDays} days
+- Target Month/Dates: ${dates || "not specified"}
+- Destination Safety Score: General ${safetyData.general_safety_score}/5.0 | Solo Women ${safetyData.girls_trip_safety_score}/5.0
+- Destination Weather: ${weatherTemp}
+- Known Attractions: ${(destInfo?.experiences || []).join(", ")}
+
+Respond warmly, accurately, and contextually to the user's latest query.
+If the user asks for a trip plan, output the estimated options with disclaimers.
+Always end with: *${DISCLAIMER_NOTE}*`;
+
+    const aiReply = await callGroqAI(systemPromptWithContext, messages);
+
+    if (aiReply) {
+      return NextResponse.json({ reply: aiReply, readyToGenerate: true });
+    }
+
+    // ── 2. FALLBACK INTENT ROUTING WHEN GROQ API KEY IS UNSET OR RATE LIMITED ──
     const isBestTimeQuery = lowerLast.includes("best time") || lowerLast.includes("when to visit") || lowerLast.includes("best month") || lowerLast.includes("weather");
     const isReachRouteQuery = lowerLast.includes("how to reach") || lowerLast.includes("how can i reach") || lowerLast.includes("transport") || lowerLast.includes("how to go");
     const isTellMeAboutQuery = lowerLast.includes("tell me about") || lowerLast.includes("info on") || lowerLast.includes("what is special") || lowerLast.includes("attractions");
@@ -264,15 +308,10 @@ export async function POST(req: NextRequest) {
     const isSafetyQuery = lowerLast.includes("safe") || lowerLast.includes("safety") || lowerLast.includes("night");
     const isFullPlanQuery = lowerLast.includes("plan") || lowerLast.includes("itinerary") || lowerLast.includes("trip to") || (source && destination);
 
-    const activeDest = destination || "Goa";
     const destKey = activeDest.toLowerCase();
     const kb = CITY_KNOWLEDGE[destKey];
-    const destInfo = await findDestination(activeDest);
-    const safetyData = await getSafetyAdvisory(activeDest);
-    const weatherData = await fetchWeather(activeDest);
-    const weatherTemp = weatherData?.[0] ? `${weatherData[0].tempMinC}°C – ${weatherData[0].tempMaxC}°C` : "22°C – 31°C";
 
-    // 1. BEST TIME / WEATHER QUERY
+    // BEST TIME / WEATHER QUERY
     if (isBestTimeQuery && !isFullPlanQuery) {
       const bestTimeText = kb ? kb.bestTime : `${destInfo?.bestTimeToVisit || "October to March"}`;
       const reply = `🌤️ **Best Time to Visit ${activeDest}**\n\n` +
@@ -283,21 +322,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ reply, readyToGenerate: false });
     }
 
-    // 2. HOW TO REACH / ROUTE QUERY
+    // HOW TO REACH / ROUTE QUERY
     if (isReachRouteQuery && !isFullPlanQuery) {
-      const srcName = source || "Mumbai";
       const route = kb?.routeInfo || {
-        flight: `Direct / Connecting flights available from ${srcName}`,
-        train: `Express / Rajdhani trains from ${srcName} to nearest junction`,
+        flight: `Direct / Connecting flights available from ${activeSource}`,
+        train: `Express / Rajdhani trains from ${activeSource} to nearest junction`,
         bus: `AC Volvo Sleeper buses operating on national highways`,
         cab: `Outstation cab options via national expressways`
       };
 
-      const flightSearchUrl = `https://www.google.com/travel/flights?q=Flights+from+${encodeURIComponent(srcName)}+to+${encodeURIComponent(activeDest)}`;
+      const flightSearchUrl = `https://www.google.com/travel/flights?q=Flights+from+${encodeURIComponent(activeSource)}+to+${encodeURIComponent(activeDest)}`;
       const trainSearchUrl = `https://www.irctc.co.in/nget/train-search`;
-      const busSearchUrl = `https://www.redbus.in/bus-tickets/${encodeURIComponent(srcName.toLowerCase())}-to-${encodeURIComponent(activeDest.toLowerCase())}`;
+      const busSearchUrl = `https://www.redbus.in/bus-tickets/${encodeURIComponent(activeSource.toLowerCase())}-to-${encodeURIComponent(activeDest.toLowerCase())}`;
 
-      const reply = `🚆 **How to Reach ${activeDest} from ${srcName}** (Transport Guidance)\n\n` +
+      const reply = `🚆 **How to Reach ${activeDest} from ${activeSource}** (Transport Guidance)\n\n` +
         `• ✈️ **Flight Option**: ${route.flight} *(Est. ~₹${kb?.flightEst || 4500}/person)*\n` +
         `  👉 **[Search Flights on Google Flights](${flightSearchUrl})**\n\n` +
         `• 🚆 **Train Option**: ${route.train} *(Est. ~₹${kb?.trainEst || 1250}/person)*\n` +
@@ -310,7 +348,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ reply, readyToGenerate: false });
     }
 
-    // 3. TELL ME ABOUT / DESTINATION HIGHLIGHTS
+    // TELL ME ABOUT / DESTINATION HIGHLIGHTS
     if (isTellMeAboutQuery && !isFullPlanQuery) {
       const attractions = kb ? kb.attractions : (destInfo?.experiences || ["Historic Monuments", "Local Markets", "Sunset Points"]);
       const tagline = kb ? kb.tagline : (destInfo?.description || `Popular destination in India`);
@@ -325,47 +363,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ reply, readyToGenerate: false });
     }
 
-    // 4. FOOD QUERY
-    if (isFoodQuery && !isFullPlanQuery) {
-      const foodItems = kb ? kb.food : ["Local Thali & Breads", "Famous Street Food Outlets", "Regional Sweets & Beverages"];
-      const reply = `🍽️ **Must-Try Culinary Highlights in ${activeDest}**\n\n` +
-        foodItems.map((f, i) => `${i + 1}. **${f}**`).join("\n") + "\n\n" +
-        `*${DISCLAIMER_NOTE}*`;
-      return NextResponse.json({ reply, readyToGenerate: false });
-    }
-
-    // 5. SAFETY QUERY
-    if (isSafetyQuery && !isFullPlanQuery) {
-      const reply = `🛡️ **Safety Insights for ${activeDest}**\n\n` +
-        `• **General Safety Rating**: ${safetyData.general_safety_score} / 5.0\n` +
-        `• **Solo / Women Traveller Safety**: ${safetyData.girls_trip_safety_score} / 5.0\n` +
-        `• **Local Note**: ${safetyData.source_note}\n` +
-        `• **Tips**: Use verified cab aggregators for late night travel and stay within well-lit main tourist belts.\n\n` +
-        `*${DISCLAIMER_NOTE}*`;
-      return NextResponse.json({ reply, readyToGenerate: false });
-    }
-
-    // ── PRE-ITINERARY CHECK FOR MISSING DETAILS ─────────────────────────────
-    const missing: string[] = [];
-    if (!travelers) missing.push("how many people are travelling");
-    if (!days) missing.push("how many days the trip will be");
-    if (!dates) missing.push("your preferred travel dates or month");
-
-    if (missing.length > 0 && (!destination || missing.length >= 2) && !isFullPlanQuery) {
-      const destPrompt = destination ? `for your trip to **${destination}**` : "for your trip";
-      return NextResponse.json({
-        reply: `Great choice! To build a tailored itinerary ${destPrompt}, could you share:\n\n` +
-          missing.map((m, idx) => `${idx + 1}. **${m.slice(0, 1).toUpperCase() + m.slice(1)}**`).join("\n") +
-          `\n\n*(For example: "2 people for 4 days in November starting from ${source || "Mumbai"}")*`,
-        readyToGenerate: false,
-      });
-    }
-
-    // ── FULL TRIP PLAN GENERATION ────────────────────────────────────────────
-    const activeSource = source || "Mumbai";
-    const activeTravelers = travelers || 2;
-    const activeDays = days || 4;
-
+    // FULL TRIP PLAN FALLBACK
     const flightPrice = (kb?.flightEst || 4800);
     const trainPrice = (kb?.trainEst || 1450);
     const busPrice = (kb?.busEst || 950);

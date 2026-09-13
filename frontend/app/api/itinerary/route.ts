@@ -1,11 +1,11 @@
 /**
  * app/api/itinerary/route.ts
  *
- * Itinerary generation endpoint using Cerebras API (llama-3.3-70b).
+ * Itinerary generation endpoint using GroqCloud API (openai/gpt-oss-120b).
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { cerebras, CEREBRAS_CHAT_MODEL } from "@/lib/cerebras";
+import { getGroqClient, GROQ_PRIMARY_MODEL } from "@/lib/groq";
 import { buildItineraryPrompt } from "@/lib/prompts";
 import type { Itinerary, ItineraryApiRequest } from "@/types/chat";
 import { randomUUID } from "crypto";
@@ -24,9 +24,17 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt = buildItineraryPrompt(tripInputs);
+    const client = getGroqClient();
 
-    const completion = await cerebras.chat.completions.create({
-      model: CEREBRAS_CHAT_MODEL,
+    if (!client) {
+      return NextResponse.json(
+        { error: "Groq API client is not configured. Please set GROQ_API_KEY." },
+        { status: 500 }
+      );
+    }
+
+    const completion = await client.chat.completions.create({
+      model: GROQ_PRIMARY_MODEL,
       messages: [
         {
           role: "user",
@@ -34,7 +42,7 @@ export async function POST(req: NextRequest) {
         },
       ],
       temperature: 0.4,
-      max_tokens: 4096,
+      max_tokens: 3000,
     });
 
     const rawContent = completion.choices[0]?.message?.content ?? "";
