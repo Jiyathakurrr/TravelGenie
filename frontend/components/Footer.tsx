@@ -1,8 +1,8 @@
 /**
  * components/Footer.tsx
  *
- * Traavellio-style footer with dark teal background, marquee tagline,
- * multi-column links, and a clean bottom bar.
+ * Traavellio-style footer with dark teal background, multi-column links,
+ * contact info, and a clean bottom bar.
  */
 import Link from "next/link";
 import { MapPin, Mail, Phone } from "lucide-react";
@@ -23,23 +23,8 @@ const DESTINATIONS = [
 ];
 
 export default function Footer() {
-  const tagline = "Your AI-Powered Travel Companion · ";
-  const repeated = tagline.repeat(8);
-
   return (
     <footer style={{ backgroundColor: "var(--color-accent)" }} className="text-white">
-      {/* Marquee */}
-      <div className="overflow-hidden py-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-        <div className="animate-marquee whitespace-nowrap flex">
-          <span
-            style={{ fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.3)" }}
-            className="text-3xl tracking-wide"
-          >
-            {repeated}
-          </span>
-        </div>
-      </div>
-
       {/* Main footer content */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
