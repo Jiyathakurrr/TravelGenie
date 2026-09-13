@@ -51,7 +51,7 @@ export default function HomePage() {
             </h2>
             <p className="mt-3 text-sm text-gray-600 flex items-center justify-center gap-4">
               <span className="inline-flex items-center gap-1"><MapPin size={14} /> Mumbai, Maharashtra</span>
-              <span className="inline-flex items-center gap-1"><Mail size={14} /> travelgenie@gmail.com</span>
+              <span className="inline-flex items-center gap-1"><Mail size={14} /> travelgenie.work@gmail.com</span>
             </p>
           </div>
           <div className="grid sm:grid-cols-3 gap-8">

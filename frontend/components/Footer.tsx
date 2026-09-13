@@ -94,7 +94,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
                 <Mail size={16} className="shrink-0" />
-                <span>travelgenie@gmail.com</span>
+                <span>travelgenie.work@gmail.com</span>
               </li>
               <li className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
                 <Phone size={16} className="shrink-0" />

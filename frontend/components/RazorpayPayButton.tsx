@@ -79,7 +79,7 @@ export default function RazorpayPayButton({ itinerary, isLoggedIn, onRequireLogi
         },
         prefill: {
           name: "Test User",
-          email: "test@travelgenie.dev",
+          email: "travelgenie.work@gmail.com",
         },
         notes: {
           simulation: "RAZORPAY TEST MODE — No real transaction",
