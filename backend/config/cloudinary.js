@@ -1,0 +1,18 @@
+const cloudinary = require("cloudinary").v2;
+
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+if (cloudName && apiKey && apiSecret) {
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+  });
+  console.log("[Cloudinary] Configured successfully.");
+} else {
+  console.warn("[Cloudinary] Credentials missing in environment variables.");
+}
+
+module.exports = cloudinary;
