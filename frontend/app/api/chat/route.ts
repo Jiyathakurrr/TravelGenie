@@ -1,218 +1,31 @@
 /**
  * app/api/chat/route.ts
  *
- * Travel Genie AI Chatbot Endpoint — Powered by GroqCloud AI
- * - Official GroqCloud API Integration (model: openai/gpt-oss-120b)
- * - Sends full conversation history and user query for context-aware responses
- * - Supports freestyle travel questions, destination info, route guidance, and structured itineraries
- * - Graceful fallback to city knowledge base on Groq rate limits (429) or missing keys
- * - Realistic disclaimers & functional transport search deep links
+ * Travel Genie AI Chatbot Endpoint — Powered by official GroqCloud API (openai/gpt-oss-120b)
+ * - Sends full conversation history and current user query directly to Groq.
+ * - Dynamic AI responses for freestyle queries, general questions, travel advice, and itinerary generation.
+ * - Clear error handling with server-side debug logs (no hardcoded fallback paragraph).
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { CHAT_SYSTEM_PROMPT } from "@/lib/prompts";
-import { findDestination, getSafetyAdvisory, DISCLAIMER_NOTE } from "@/lib/db";
-import { fetchWeather } from "@/lib/weather";
 import { getGroqClient, GROQ_PRIMARY_MODEL, GROQ_FALLBACK_MODEL } from "@/lib/groq";
-
-const INDIAN_CITIES = [
-  "Delhi", "Mumbai", "Jaipur", "Goa", "Manali", "Udaipur", "Rishikesh",
-  "Kochi", "Shimla", "Agra", "Varanasi", "Amritsar", "Pondicherry", "Coorg",
-  "Darjeeling", "Mysore", "Hampi", "Andaman", "Ladakh", "Munnar", "Ooty",
-  "Kasol", "Jaisalmer", "Srinagar", "Gangtok", "Bangalore", "Hyderabad",
-  "Kolkata", "Chennai", "Pune", "Ahmedabad"
-];
-
-// Rich fallback knowledge per city when AI API is unavailable
-const CITY_KNOWLEDGE: Record<string, {
-  tagline: string;
-  bestTime: string;
-  attractions: string[];
-  food: string[];
-  routeInfo: { flight: string; train: string; bus: string; cab: string };
-  flightEst: number;
-  trainEst: number;
-  busEst: number;
-  cabEst: number;
-}> = {
-  varanasi: {
-    tagline: "Spiritual capital along the sacred Ganges, famous for ancient ghats and evening Ganga Aarti",
-    bestTime: "October to March (pleasant weather for ghat walks and boat rides)",
-    attractions: ["Dashashwamedh Ghat Evening Aarti", "Sunrise Ganges Boat Ride", "Kashi Vishwanath Temple", "Sarnath Buddhist Stupa"],
-    food: ["Malaiyo (winter sweet)", "Kachori Sabzi at Ram Bhandar", "Varanasi Paan", "Tamatar Chaat at Deena Chaat Bhandar"],
-    routeInfo: {
-      flight: "Direct flights available to Lal Bahadur Shastri International Airport (VNS)",
-      train: "Vande Bharat / Express trains to Varanasi Junction (BSB) or Banaras (BSBS)",
-      bus: "AC Sleeper buses from Lucknow, Prayagraj, and Delhi",
-      cab: "Private outstation cab via Purvanchal / NH19 expressways"
-    },
-    flightEst: 4500, trainEst: 1250, busEst: 850, cabEst: 6500
-  },
-  amritsar: {
-    tagline: "Spiritual heart of Sikhism, home to the Golden Temple and rich Punjabi culture",
-    bestTime: "October to March (cool and comfortable for sightseeing)",
-    attractions: ["Sri Harmandir Sahib (Golden Temple)", "Wagah Border Beating Retreat Ceremony", "Jallianwala Bagh Memorial", "Gobindgarh Fort"],
-    food: ["Amritsari Kulcha with Chole", "Guru ka Langar at Golden Temple", "Ahuja Lassi", "Makki di Roti & Sarson da Saag"],
-    routeInfo: {
-      flight: "Non-stop flights to Sri Guru Ram Dass Jee International Airport (ATQ)",
-      train: "Shatabdi & Swarna Jayanti Express to Amritsar Junction (ASR)",
-      bus: "Volvo AC buses from Delhi (ISBT Kashmiri Gate) and Chandigarh",
-      cab: "Highway drive via NH44 (Delhi-Amritsar Highway)"
-    },
-    flightEst: 4200, trainEst: 1100, busEst: 800, cabEst: 6000
-  },
-  mysore: {
-    tagline: "Royal Heritage City known for Mysore Palace, silk sarees, and sandalwood",
-    bestTime: "October to March (especially during Dasara festival in October)",
-    attractions: ["Mysore Palace (illuminated on Sundays)", "Chamundi Hill & Chamundeshwari Temple", "Brindavan Gardens", "Devaraja Market"],
-    food: ["Mysore Pak at Guru Sweets", "Mylari Dosa", "Filter Coffee", "Mysore Masala Dosa"],
-    routeInfo: {
-      flight: "Fly to Bengaluru (BLR) or Mysore Airport (MYQ) followed by Vande Bharat / Cab",
-      train: "Vande Bharat Express (2h) from Bengaluru to Mysuru Junction (MYS)",
-      bus: "KSRTC Flybus / EV buses from Bengaluru Airport direct to Mysore",
-      cab: "Smooth 2-hour drive via Bengaluru-Mysuru Expressway"
-    },
-    flightEst: 3800, trainEst: 650, busEst: 450, cabEst: 3200
-  },
-  hampi: {
-    tagline: "UNESCO World Heritage site of surreal boulder landscapes and Vijayanagara ruins",
-    bestTime: "October to February (cool temperatures ideal for walking among ruins)",
-    attractions: ["Virupaksha Temple", "Stone Chariot at Vittala Temple", "Matanga Hill Sunset View", "Coracle Boat Ride on Tungabhadra River"],
-    food: ["South Indian Thali at Mango Tree Cafe", "Fresh Coconut Water", "Israeli & Continental at Hippie Island Cafes"],
-    routeInfo: {
-      flight: "Fly to Jindal Vijayanagar Airport (VDY - Toranagallu) or Hubballi (HBX)",
-      train: "Hampi Express or Mysuru Express to Hosapete Junction (HPT - 13km from Hampi)",
-      bus: "Overnight KSRTC / Private Volvo buses from Bengaluru, Goa, or Hyderabad to Hosapete",
-      cab: "Outstation SUV cab from Hubballi, Goa, or Bengaluru"
-    },
-    flightEst: 5200, trainEst: 950, busEst: 800, cabEst: 5500
-  },
-  ooty: {
-    tagline: "Queen of Nilgiri Hill Stations with tea estates, botanical gardens, and toy train",
-    bestTime: "October to June (pleasant summers and scenic misty winters)",
-    attractions: ["UNESCO Nilgiri Mountain Railway (Toy Train)", "Ooty Lake & Boating", "Government Botanical Garden", "Doddabetta Peak"],
-    food: ["Ooty Homemade Chocolates", "Fresh Nilgiri Tea", "Varkey (traditional baked biscuit)", "South Indian Thali"],
-    routeInfo: {
-      flight: "Fly to Coimbatore International Airport (CJB - 88km away) then cab/bus uphill",
-      train: "Nilgiri Passenger Toy Train from Mettupalayam to Ooty (UAM)",
-      bus: "TNSTC / KSRTC mountain buses from Coimbatore, Mysore, and Bengaluru",
-      cab: "Scenic hill climb drive via Kallar Ghat road / Kotagiri route"
-    },
-    flightEst: 4100, trainEst: 850, busEst: 600, cabEst: 3500
-  },
-  goa: {
-    tagline: "Beach paradise of golden sands, Portuguese churches, and vibrant coastal nightlife",
-    bestTime: "November to February (sunny weather, beach shacks, and water sports)",
-    attractions: ["Baga & Calangute Beaches", "Basilica of Bom Jesus (Old Goa)", "Dudhsagar Waterfalls", "Mandovi River Cruise"],
-    food: ["Goan Fish Curry Rice", "Bebinca Dessert", "Prawn Balchão", "Chicken Xacuti"],
-    routeInfo: {
-      flight: "Direct flights to Dabolim (GOI) or Manohar International Airport Mopa (GOX)",
-      train: "Madgaon Express / Tejas Express to Madgaon (MAO) or Thivim (THVM)",
-      bus: "Overnight AC Volvo sleeper buses from Mumbai, Pune, or Bengaluru",
-      cab: "Coastal highway drive via NH66"
-    },
-    flightEst: 4800, trainEst: 1450, busEst: 950, cabEst: 7500
-  },
-  jaipur: {
-    tagline: "The Pink City of grand fortresses, royal palaces, and vibrant Rajasthani bazaars",
-    bestTime: "October to March (mild winter sun perfect for sightseeing)",
-    attractions: ["Amer Fort & Elephant Hill Climb", "Hawa Mahal (Palace of Winds)", "City Palace & Jantar Mantar", "Johari & Bapu Bazaars"],
-    food: ["Dal Baati Churma", "Pyaaz Kachori at Rawat", "Laal Maas", "Ghevar at LMB"],
-    routeInfo: {
-      flight: "Non-stop flights to Jaipur International Airport (JAI)",
-      train: "Vande Bharat & Ajmer Shatabdi from Delhi / Mumbai to Jaipur Junction (JP)",
-      bus: "RSRTC Goldline Volvo buses from Delhi (ISBT) every 30 minutes",
-      cab: "Delhi-Jaipur Expressway (3.5 hours drive)"
-    },
-    flightEst: 3900, trainEst: 1100, busEst: 750, cabEst: 4800
-  },
-  manali: {
-    tagline: "Himalayan valley of snow peaks, pine forests, and adventure sports",
-    bestTime: "October to June (snow in Dec-Feb, pleasant valley green in Mar-Jun)",
-    attractions: ["Solang Valley Adventure Park", "Rohtang Pass Snow Point", "Hadimba Temple", "Old Manali Cafe Street"],
-    food: ["Siddu (traditional Himachali steamed bread)", "Trout Fish", "Thukpa & Momos", "Apple Cider"],
-    routeInfo: {
-      flight: "Fly to Bhuntar / Kullu-Manali Airport (KUU - 50km) or Chandigarh",
-      train: "Train to Chandigarh (CDG) then scenic Volvo bus uphill",
-      bus: "HPTDC / Private Volvo sleeper buses overnight from Delhi & Chandigarh",
-      cab: "Mountain highway drive via Kiratpur-Manali Expressway"
-    },
-    flightEst: 6500, trainEst: 1200, busEst: 1100, cabEst: 8500
-  }
-};
-
-function extractCities(text: string): { source: string | null; destination: string | null } {
-  let source: string | null = null;
-  let destination: string | null = null;
-
-  const fromToMatch = text.match(/from\s+([a-zA-Z\s]+?)\s+to\s+([a-zA-Z\s]+)/i);
-  if (fromToMatch) {
-    const rawSrc = fromToMatch[1].trim();
-    const rawDst = fromToMatch[2].trim();
-
-    const matchedSrc = INDIAN_CITIES.find(c => c.toLowerCase() === rawSrc.toLowerCase() || rawSrc.toLowerCase().includes(c.toLowerCase()));
-    const matchedDst = INDIAN_CITIES.find(c => c.toLowerCase() === rawDst.toLowerCase() || rawDst.toLowerCase().includes(c.toLowerCase()));
-
-    source = matchedSrc || rawSrc;
-    destination = matchedDst || rawDst;
-    return { source, destination };
-  }
-
-  const toFromMatch = text.match(/to\s+([a-zA-Z\s]+?)\s+from\s+([a-zA-Z\s]+)/i);
-  if (toFromMatch) {
-    const rawDst = toFromMatch[1].trim();
-    const rawSrc = toFromMatch[2].trim();
-
-    const matchedDst = INDIAN_CITIES.find(c => c.toLowerCase() === rawDst.toLowerCase() || rawDst.toLowerCase().includes(c.toLowerCase()));
-    const matchedSrc = INDIAN_CITIES.find(c => c.toLowerCase() === rawSrc.toLowerCase() || rawSrc.toLowerCase().includes(c.toLowerCase()));
-
-    destination = matchedDst || rawDst;
-    source = matchedSrc || rawSrc;
-    return { source, destination };
-  }
-
-  const foundCities: string[] = [];
-  INDIAN_CITIES.forEach((city) => {
-    const reg = new RegExp(`\\b${city}\\b`, "i");
-    if (reg.test(text)) {
-      foundCities.push(city);
-    }
-  });
-
-  if (foundCities.length >= 2) {
-    source = foundCities[0];
-    destination = foundCities[1];
-  } else if (foundCities.length === 1) {
-    destination = foundCities[0];
-  }
-
-  return { source, destination };
-}
-
-function extractTripDetails(text: string) {
-  const travelersMatch = text.match(/(\d+)\s*(people|person|traveler|traveller|friend|adult)/i);
-  const daysMatch = text.match(/(\d+)\s*(day|night)/i);
-  const dateMatch = text.match(/(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec|\d{1,2}\/\d{1,2}|\d{4}-\d{2}-\d{2})/i);
-
-  return {
-    travelers: travelersMatch ? parseInt(travelersMatch[1], 10) : null,
-    days: daysMatch ? parseInt(daysMatch[1], 10) : null,
-    dates: dateMatch ? dateMatch[0] : null,
-  };
-}
 
 /**
  * Call official GroqCloud API with primary model (openai/gpt-oss-120b)
- * and fallback to llama-3.3-70b-versatile on rate limits (429) or model errors.
+ * or fallback model (llama-3.3-70b-versatile) on rate limits (429).
  */
 async function callGroqAI(
   systemPrompt: string,
   messages: Array<{ role: string; content: string }>
-): Promise<string | null> {
+): Promise<{ text: string | null; status: number; modelUsed: string; errorMsg?: string }> {
   const client = getGroqClient();
-  if (!client) return null;
+  if (!client) {
+    console.error("[DEBUG] Groq client initialization failed: GROQ_API_KEY is not set in environment.");
+    return { text: null, status: 500, modelUsed: "none", errorMsg: "GROQ_API_KEY is missing in backend environment variables." };
+  }
 
-  // Explicitly type role as "system" | "user" | "assistant" for OpenAI SDK compatibility
+  // Explicitly format messages for OpenAI SDK compatibility
   const formattedMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
     { role: "system", content: systemPrompt },
     ...messages.map((m) => ({
@@ -221,31 +34,43 @@ async function callGroqAI(
     })),
   ];
 
+  console.log(`[DEBUG] Selected Model: ${GROQ_PRIMARY_MODEL}`);
+  console.log(`[DEBUG] Conversation History Length: ${messages.length}`);
+
   try {
     const response = await client.chat.completions.create({
       model: GROQ_PRIMARY_MODEL,
       messages: formattedMessages,
-      max_tokens: 1400,
+      max_tokens: 1500,
       temperature: 0.7,
     });
 
-    return response.choices[0]?.message?.content ?? null;
+    const replyText = response.choices[0]?.message?.content ?? null;
+    console.log(`[DEBUG] Groq Response Status: 200 OK`);
+    console.log(`[DEBUG] Returned Response Text Preview: "${replyText?.substring(0, 100).replace(/\n/g, " ")}..."`);
+
+    return { text: replyText, status: 200, modelUsed: GROQ_PRIMARY_MODEL };
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    console.warn(`[groq] Primary model (${GROQ_PRIMARY_MODEL}) call failed: ${errMsg}. Trying fallback model...`);
+    console.warn(`[DEBUG] Primary model (${GROQ_PRIMARY_MODEL}) call failed: ${errMsg}. Trying fallback model (${GROQ_FALLBACK_MODEL})...`);
 
     try {
       const fallbackResponse = await client.chat.completions.create({
         model: GROQ_FALLBACK_MODEL,
         messages: formattedMessages,
-        max_tokens: 1400,
+        max_tokens: 1500,
         temperature: 0.7,
       });
-      return fallbackResponse.choices[0]?.message?.content ?? null;
+
+      const replyText = fallbackResponse.choices[0]?.message?.content ?? null;
+      console.log(`[DEBUG] Groq Fallback Response Status: 200 OK (Model: ${GROQ_FALLBACK_MODEL})`);
+      console.log(`[DEBUG] Returned Response Text Preview: "${replyText?.substring(0, 100).replace(/\n/g, " ")}..."`);
+
+      return { text: replyText, status: 200, modelUsed: GROQ_FALLBACK_MODEL };
     } catch (fallbackErr: unknown) {
       const fbMsg = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
-      console.error(`[groq] Fallback model (${GROQ_FALLBACK_MODEL}) call also failed: ${fbMsg}`);
-      return null;
+      console.error(`[DEBUG] Groq Response Status: Error (Fallback also failed: ${fbMsg})`);
+      return { text: null, status: 500, modelUsed: GROQ_FALLBACK_MODEL, errorMsg: fbMsg };
     }
   }
 }
@@ -259,171 +84,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "messages array is required" }, { status: 400 });
     }
 
-    const userMessages = messages.filter((m: { role: string }) => m.role === "user");
-    const fullUserText = userMessages.map((m: { content: string }) => m.content).join(" ");
-    const lastUserMsg = userMessages[userMessages.length - 1]?.content || "";
-    const lowerLast = lastUserMsg.toLowerCase();
+    const lastUserMsg = messages[messages.length - 1]?.content || "";
+    console.log(`[DEBUG] Received User Message: "${lastUserMsg}"`);
 
-    const { source, destination } = extractCities(fullUserText);
-    const { travelers, days, dates } = extractTripDetails(fullUserText);
+    // Call Groq AI with full context and conversation history
+    const result = await callGroqAI(CHAT_SYSTEM_PROMPT, messages);
 
-    const activeDest = destination || "Goa";
-    const activeSource = source || "Mumbai";
-    const activeTravelers = travelers || 2;
-    const activeDays = days || 4;
-
-    const destInfo = await findDestination(activeDest);
-    const safetyData = await getSafetyAdvisory(activeDest);
-    const weatherData = await fetchWeather(activeDest);
-    const weatherTemp = weatherData?.[0] ? `${weatherData[0].tempMinC}°C – ${weatherData[0].tempMaxC}°C` : "22°C – 31°C";
-
-    // ── 1. TRY DYNAMIC GROQ AI RESPONSE FOR ALL QUESTIONS ───────────────────
-    const systemPromptWithContext = `${CHAT_SYSTEM_PROMPT}
-
-## ACTIVE TRIP CONTEXT
-- Origin City: ${activeSource}
-- Target Destination: ${activeDest}
-- Travellers: ${activeTravelers} people
-- Trip Duration: ${activeDays} days
-- Target Month/Dates: ${dates || "not specified"}
-- Destination Safety Score: General ${safetyData.general_safety_score}/5.0 | Solo Women ${safetyData.girls_trip_safety_score}/5.0
-- Destination Weather: ${weatherTemp}
-- Known Attractions: ${(destInfo?.experiences || []).join(", ")}
-
-Respond warmly, accurately, and contextually to the user's latest query.
-If the user asks for a trip plan, output the estimated options with disclaimers.
-Always end with: *${DISCLAIMER_NOTE}*`;
-
-    const aiReply = await callGroqAI(systemPromptWithContext, messages);
-
-    if (aiReply) {
-      return NextResponse.json({ reply: aiReply, readyToGenerate: true });
+    if (result.text) {
+      return NextResponse.json({ reply: result.text, model: result.modelUsed });
     }
 
-    // ── 2. FALLBACK INTENT ROUTING WHEN GROQ API KEY IS UNSET OR RATE LIMITED ──
-    const isBestTimeQuery = lowerLast.includes("best time") || lowerLast.includes("when to visit") || lowerLast.includes("best month") || lowerLast.includes("weather");
-    const isReachRouteQuery = lowerLast.includes("how to reach") || lowerLast.includes("how can i reach") || lowerLast.includes("transport") || lowerLast.includes("how to go");
-    const isTellMeAboutQuery = lowerLast.includes("tell me about") || lowerLast.includes("info on") || lowerLast.includes("what is special") || lowerLast.includes("attractions");
-    const isFoodQuery = lowerLast.includes("food") || lowerLast.includes("eat") || lowerLast.includes("dishes") || lowerLast.includes("culinary");
-    const isSafetyQuery = lowerLast.includes("safe") || lowerLast.includes("safety") || lowerLast.includes("night");
-    const isFullPlanQuery = lowerLast.includes("plan") || lowerLast.includes("itinerary") || lowerLast.includes("trip to") || (source && destination);
-
-    const destKey = activeDest.toLowerCase();
-    const kb = CITY_KNOWLEDGE[destKey];
-
-    // BEST TIME / WEATHER QUERY
-    if (isBestTimeQuery && !isFullPlanQuery) {
-      const bestTimeText = kb ? kb.bestTime : `${destInfo?.bestTimeToVisit || "October to March"}`;
-      const reply = `🌤️ **Best Time to Visit ${activeDest}**\n\n` +
-        `• **Recommended Months**: ${bestTimeText}\n` +
-        `• **Current Forecast**: Expected temperature range of **${weatherTemp}** with generally pleasant skies.\n` +
-        `• **Travel Tip**: Packing light cottons along with a light sweater for evening strolls is recommended.\n\n` +
-        `*${DISCLAIMER_NOTE}*`;
-      return NextResponse.json({ reply, readyToGenerate: false });
-    }
-
-    // HOW TO REACH / ROUTE QUERY
-    if (isReachRouteQuery && !isFullPlanQuery) {
-      const route = kb?.routeInfo || {
-        flight: `Direct / Connecting flights available from ${activeSource}`,
-        train: `Express / Rajdhani trains from ${activeSource} to nearest junction`,
-        bus: `AC Volvo Sleeper buses operating on national highways`,
-        cab: `Outstation cab options via national expressways`
-      };
-
-      const flightSearchUrl = `https://www.google.com/travel/flights?q=Flights+from+${encodeURIComponent(activeSource)}+to+${encodeURIComponent(activeDest)}`;
-      const trainSearchUrl = `https://www.irctc.co.in/nget/train-search`;
-      const busSearchUrl = `https://www.redbus.in/bus-tickets/${encodeURIComponent(activeSource.toLowerCase())}-to-${encodeURIComponent(activeDest.toLowerCase())}`;
-
-      const reply = `🚆 **How to Reach ${activeDest} from ${activeSource}** (Transport Guidance)\n\n` +
-        `• ✈️ **Flight Option**: ${route.flight} *(Est. ~₹${kb?.flightEst || 4500}/person)*\n` +
-        `  👉 **[Search Flights on Google Flights](${flightSearchUrl})**\n\n` +
-        `• 🚆 **Train Option**: ${route.train} *(Est. ~₹${kb?.trainEst || 1250}/person)*\n` +
-        `  👉 **[Search Trains on IRCTC](${trainSearchUrl})**\n\n` +
-        `• 🚌 **Bus Option**: ${route.bus} *(Est. ~₹${kb?.busEst || 950}/person)*\n` +
-        `  👉 **[Search Buses on RedBus](${busSearchUrl})**\n\n` +
-        `• 🚗 **Cab Option**: ${route.cab} *(Est. ~₹${kb?.cabEst || 6500} total vehicle fare)*\n\n` +
-        `📌 *Note: Fares and schedules are estimated values for planning. Live availability must be checked on official booking portals.*\n\n` +
-        `*${DISCLAIMER_NOTE}*`;
-      return NextResponse.json({ reply, readyToGenerate: false });
-    }
-
-    // TELL ME ABOUT / DESTINATION HIGHLIGHTS
-    if (isTellMeAboutQuery && !isFullPlanQuery) {
-      const attractions = kb ? kb.attractions : (destInfo?.experiences || ["Historic Monuments", "Local Markets", "Sunset Points"]);
-      const tagline = kb ? kb.tagline : (destInfo?.description || `Popular destination in India`);
-
-      const reply = `🏛️ **About ${activeDest}**\n\n` +
-        `**Overview**: ${tagline}\n\n` +
-        `**Top Attractions & Experiences**:\n` +
-        attractions.map(a => `• **${a}**`).join("\n") + "\n\n" +
-        `• **Best Season**: ${kb?.bestTime || destInfo?.bestTimeToVisit || "October to March"}\n` +
-        `• **Safety Score**: ${safetyData.general_safety_score} / 5.0\n\n` +
-        `*${DISCLAIMER_NOTE}*`;
-      return NextResponse.json({ reply, readyToGenerate: false });
-    }
-
-    // FULL TRIP PLAN FALLBACK
-    const flightPrice = (kb?.flightEst || 4800);
-    const trainPrice = (kb?.trainEst || 1450);
-    const busPrice = (kb?.busEst || 950);
-    const cabPrice = (kb?.cabEst || 7500);
-
-    const flightSearchUrl = `https://www.google.com/travel/flights?q=Flights+from+${encodeURIComponent(activeSource)}+to+${encodeURIComponent(activeDest)}`;
-    const trainSearchUrl = `https://www.irctc.co.in/nget/train-search`;
-    const busSearchUrl = `https://www.redbus.in/bus-tickets/${encodeURIComponent(activeSource.toLowerCase())}-to-${encodeURIComponent(activeDest.toLowerCase())}`;
-    const cabSearchUrl = `https://www.makemytrip.com/cabs/`;
-
-    const attractionsList = kb ? kb.attractions : (destInfo?.experiences || ["Heritage Tour", "Local Markets", "Sunset Viewpoint"]);
-    const foodList = kb ? kb.food : ["Regional Thali", "Street Food Bazaars"];
-
-    const itineraryReply = `Namaste! ✈️ Here are your estimated **${activeDays}-Day Travel Plan Options** for **${activeSource} → ${activeDest}** (for **${activeTravelers} traveller(s)**):\n\n` +
-      `📌 *Disclaimer: Fares, schedules, and hotel availability shown below are estimated reference values for planning purposes. Please verify live availability on official booking portals before confirming.*\n\n` +
-      `--- \n### ✈️ Option 1 — Flight Plan (Estimated)\n` +
-      `• **Route**: Non-stop / Connecting Flight from ${activeSource} to nearest airport for ${activeDest}\n` +
-      `• **Sample Timings**: Departure 08:30 AM → Arrival 10:45 AM (Est. 2h 15m)\n` +
-      `• **Estimated Airfare**: ₹${flightPrice.toLocaleString("en-IN")}/person (Total: ₹${(flightPrice * activeTravelers).toLocaleString("en-IN")})\n` +
-      `• **Accommodation**: 3/4-Star Heritage Hotel (${activeDays} nights) · *(subject to live availability)*\n` +
-      `• **Total Trip Estimate**: ₹${((flightPrice * activeTravelers) + (3500 * activeDays) + (1000 * activeTravelers * activeDays)).toLocaleString("en-IN")}\n\n` +
-      `🔗 **[Search Flights on Google Flights](${flightSearchUrl})** &nbsp;|&nbsp; 👉 **[Plan This Flight Plan](/plan?option=flight&source=${encodeURIComponent(activeSource)}&dest=${encodeURIComponent(activeDest)})**\n\n` +
-      `--- \n### 🚆 Option 2 — Express Train Plan (Estimated)\n` +
-      `• **Route**: Express / Rajdhani Train (3AC/2AC Class) from ${activeSource} to ${activeDest} junction\n` +
-      `• **Sample Timings**: Departure 07:15 PM → Arrival 06:45 AM (+1 day)\n` +
-      `• **Estimated Rail Fare**: ₹${trainPrice.toLocaleString("en-IN")}/person (Total: ₹${(trainPrice * activeTravelers).toLocaleString("en-IN")})\n` +
-      `• **Tatkal / General Booking**: *Check IRCTC portal 1 day prior at 10:00 AM for Tatkal quota*\n` +
-      `• **Accommodation**: Boutique City Hotel (${activeDays} nights) · *(subject to live availability)*\n` +
-      `• **Total Trip Estimate**: ₹${((trainPrice * activeTravelers) + (2200 * activeDays) + (800 * activeTravelers * activeDays)).toLocaleString("en-IN")}\n\n` +
-      `🔗 **[Search Trains on IRCTC](${trainSearchUrl})** &nbsp;|&nbsp; 👉 **[Plan This Train Plan](/plan?option=train&source=${encodeURIComponent(activeSource)}&dest=${encodeURIComponent(activeDest)})**\n\n` +
-      `--- \n### 🚌 Option 3 — AC Volvo Bus Plan (Estimated)\n` +
-      `• **Route**: Direct AC Volvo Sleeper / Seater Bus from ${activeSource}\n` +
-      `• **Sample Timings**: Departure 08:00 PM → Arrival 09:00 AM (+1 day)\n` +
-      `• **Estimated Bus Fare**: ₹${busPrice.toLocaleString("en-IN")}/person (Total: ₹${(busPrice * activeTravelers).toLocaleString("en-IN")})\n` +
-      `• **Accommodation**: Deluxe Guesthouse (${activeDays} nights) · *(subject to live availability)*\n` +
-      `• **Total Trip Estimate**: ₹${((busPrice * activeTravelers) + (1600 * activeDays) + (600 * activeTravelers * activeDays)).toLocaleString("en-IN")}\n\n` +
-      `🔗 **[Search Buses on RedBus](${busSearchUrl})** &nbsp;|&nbsp; 👉 **[Plan This Bus Plan](/plan?option=bus&source=${encodeURIComponent(activeSource)}&dest=${encodeURIComponent(activeDest)})**\n\n` +
-      `--- \n### 🚗 Option 4 — Private Outstation Cab (Best Value)\n` +
-      `• **Route**: Door-to-door Outstation SUV Cab from ${activeSource} to ${activeDest}\n` +
-      `• **Sample Timings**: Flexible On-Demand Pickup\n` +
-      `• **Estimated Cab Fare**: ₹${cabPrice.toLocaleString("en-IN")} total vehicle fare (~₹${Math.round(cabPrice / activeTravelers).toLocaleString("en-IN")}/person)\n` +
-      `• **Total Trip Estimate**: ₹${(cabPrice + (2500 * activeDays) + (700 * activeTravelers * activeDays)).toLocaleString("en-IN")}\n\n` +
-      `🔗 **[Search Outstation Cabs](${cabSearchUrl})** &nbsp;|&nbsp; 👉 **[Plan This Cab Plan](/plan?option=cab&source=${encodeURIComponent(activeSource)}&dest=${encodeURIComponent(activeDest)})**\n\n` +
-      `### 🌤️ Expected Weather Forecast\n` +
-      `• Expected Temperature: ${weatherTemp} · Pack comfortable clothes and light layering.\n\n` +
-      `### 🛡️ Safety Info Card\n` +
-      `• **General Safety Score**: ${safetyData.general_safety_score} / 5.0\n` +
-      `• **Solo / Women Safety Score**: ${safetyData.girls_trip_safety_score} / 5.0\n` +
-      `• **Local Note**: ${safetyData.source_note}\n\n` +
-      `### 📍 Key Highlights to Visit in ${activeDest}\n` +
-      attractionsList.map(a => `• **${a}**`).join("\n") + "\n\n" +
-      `### 🍽️ Recommended Local Food\n` +
-      foodList.map(f => `• **${f}**`).join("\n") + "\n\n" +
-      `*${DISCLAIMER_NOTE}*`;
-
-    return NextResponse.json({ reply: itineraryReply, readyToGenerate: true });
-  } catch (err: unknown) {
-    console.error("[api/chat] Error:", err);
+    // Return explicit error message if Groq API fails (NO hardcoded fallback text)
+    const displayError = result.errorMsg || "Unable to reach GroqCloud AI service. Please check API key configuration or try again.";
     return NextResponse.json(
-      { error: "Failed to process request. Please try again." },
+      { error: `⚠️ AI Service Error: ${displayError}` },
+      { status: 500 }
+    );
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.error("[DEBUG] /api/chat POST Exception:", errMsg);
+    return NextResponse.json(
+      { error: `⚠️ Internal Server Error: ${errMsg}` },
       { status: 500 }
     );
   }
