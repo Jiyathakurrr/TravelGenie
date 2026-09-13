@@ -19,6 +19,7 @@ export interface ChatMessage {
 // ─── Trip Inputs ──────────────────────────────────────────────────────────────
 
 export interface TripInputs {
+  source?: string;
   destination: string;
   startDate: string;   // ISO date string e.g. "2025-03-10"
   endDate: string;     // ISO date string
@@ -193,7 +194,8 @@ export interface Booking {
 export interface Destination {
   slug: string;
   name: string;
-  tagline: string;
+  tagline?: string;
+  popular_for?: string;
   description: string;
   heroImage: string;
   rating: number;
