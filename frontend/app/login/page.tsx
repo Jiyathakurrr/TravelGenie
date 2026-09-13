@@ -1,24 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTarget = searchParams.get("redirect") || "/bookings";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState("");
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
-  // Check existing session on mount
   useEffect(() => {
     async function checkSession() {
       const { supabaseBrowser } = await import("@/lib/supabase");
@@ -32,6 +37,8 @@ export default function LoginPage() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setUnconfirmedEmail(false);
+    setResendSent(false);
 
     if (!email.trim()) {
       setError("Please enter your email.");
@@ -50,20 +57,37 @@ export default function LoginPage() {
         password,
       });
       if (authError) throw authError;
-      // Session is persisted automatically by Supabase in localStorage/cookie
-      router.push("/bookings");
+
+      router.push(redirectTarget);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Login failed. Please try again.";
-      // Make Supabase error messages more user-friendly
       if (msg.includes("Invalid login credentials")) {
         setError("Invalid email or password. Please try again.");
       } else if (msg.includes("Email not confirmed")) {
-        setError("Please confirm your email address before logging in. Check your inbox.");
+        setUnconfirmedEmail(true);
+        setError("Please confirm your email address before logging in. Check your inbox for the verification link.");
       } else {
         setError(msg);
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleResendVerification() {
+    if (!email.trim()) return;
+    setResending(true);
+    try {
+      const { supabaseBrowser } = await import("@/lib/supabase");
+      await supabaseBrowser.auth.resend({
+        type: "signup",
+        email: email.trim(),
+      });
+      setResendSent(true);
+    } catch (err) {
+      console.error("Resend error:", err);
+    } finally {
+      setResending(false);
     }
   }
 
@@ -90,7 +114,6 @@ export default function LoginPage() {
     );
   }
 
-  // Already logged in — show session info
   if (user) {
     return (
       <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--color-cream)" }}>
@@ -113,18 +136,18 @@ export default function LoginPage() {
               </p>
               <div className="flex flex-col gap-3">
                 <Link
-                  href="/bookings"
+                  href="/plan"
                   className="w-full py-3 rounded-[var(--radius-md)] text-sm font-semibold text-center transition-all active:scale-95"
                   style={{ backgroundColor: "var(--color-accent)", color: "white" }}
                 >
-                  View My Bookings
+                  Plan a Trip
                 </Link>
                 <Link
-                  href="/plan"
+                  href="/bookings"
                   className="w-full py-3 rounded-[var(--radius-md)] text-sm font-semibold text-center transition-all active:scale-95"
                   style={{ backgroundColor: "var(--color-surface)", color: "var(--color-primary)", border: "1px solid var(--color-border)" }}
                 >
-                  Plan a Trip
+                  View My Bookings
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -155,22 +178,40 @@ export default function LoginPage() {
               Welcome back
             </h1>
             <p className="text-sm mb-7" style={{ color: "var(--color-secondary)" }}>
-              Sign in to view your bookings and saved trips.
+              Sign in to plan, save itineraries, and manage trips.
             </p>
 
             {error && (
               <div
-                className="mb-5 p-3 rounded-[var(--radius-sm)] text-sm"
+                className="mb-5 p-3.5 rounded-[var(--radius-sm)] text-sm space-y-2"
                 style={{ backgroundColor: "#FEF2F2", color: "#991B1B", border: "1px solid #FCA5A5" }}
               >
-                {error}
+                <p>{error}</p>
+                {unconfirmedEmail && (
+                  <div>
+                    {resendSent ? (
+                      <p className="text-xs text-emerald-700 flex items-center gap-1 font-medium mt-1">
+                        <CheckCircle2 size={14} /> Verification email resent! Check your inbox.
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleResendVerification}
+                        disabled={resending}
+                        className="text-xs font-semibold underline hover:opacity-80 mt-1 text-red-900"
+                      >
+                        {resending ? "Resending verification email..." : "Click here to resend verification email"}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "var(--color-secondary)" }}>
-                  Email
+                  Email Address
                 </label>
                 <input
                   type="email"
@@ -212,8 +253,8 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-[var(--radius-md)] text-sm font-semibold transition-all active:scale-95 disabled:opacity-60 mt-2"
-                style={{ backgroundColor: "var(--color-accent)", color: "white" }}
+                className="w-full py-3 rounded-[var(--radius-md)] text-sm font-semibold transition-all active:scale-95 disabled:opacity-60 mt-2 text-white"
+                style={{ backgroundColor: "var(--color-accent)" }}
               >
                 {loading ? <Loader2 size={16} className="animate-spin mx-auto" /> : "Sign In"}
               </button>
@@ -221,7 +262,7 @@ export default function LoginPage() {
 
             <p className="text-sm text-center mt-6" style={{ color: "var(--color-secondary)" }}>
               No account?{" "}
-              <Link href="/signup" className="font-semibold" style={{ color: "var(--color-accent)" }}>
+              <Link href={`/signup${redirectTarget ? `?redirect=${encodeURIComponent(redirectTarget)}` : ""}`} className="font-semibold" style={{ color: "var(--color-accent)" }}>
                 Create one
               </Link>
             </p>
@@ -230,5 +271,17 @@ export default function LoginPage() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -1,14 +1,15 @@
 /**
  * app/plan/page.tsx — AI chatbot and itinerary page (/plan)
- * Conversational interface powered by Kie API (KIE_API_KEY).
+ * Conversational interface with auth enforcement, intent knowledge base, and booking search links.
  */
 "use client";
 
 import { useState, useRef, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { Send, Loader2, Bot, MapPin, RotateCcw, ShieldCheck, Clock, Utensils, Calendar, CheckCircle } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Send, Loader2, Bot, MapPin, RotateCcw, ShieldCheck, Clock, Utensils, Calendar, CheckCircle, ExternalLink, Lock, LogIn, UserPlus, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import type { User } from "@supabase/supabase-js";
 
 interface ChatMessage {
   id: string;
@@ -27,34 +28,61 @@ function makeMsg(role: ChatMessage["role"], content: string): ChatMessage {
 
 const WELCOME = makeMsg(
   "assistant",
-  "Namaste! ✈️ I'm Travel Genie — your pan-India AI travel companion.\n\nTell me your trip plan! Where are you starting from, where would you like to go, travel dates, traveller count, and total budget in INR?\n\nExample: *\"I want to travel from Mumbai to Agra for 4 days with 2 friends, budget ₹40,000\"*"
+  "Namaste! ✈️ I'm Travel Genie — your pan-India AI travel companion.\n\nTell me your trip plan! Where are you starting from, where would you like to go, travel dates, traveller count, and total budget in INR?\n\nExample: *\"I want to travel from Mumbai to Varanasi for 4 days with 2 friends, budget ₹40,000\"*"
 );
 
 const QUICK_REPLIES = [
-  { label: "Is it safe at night?", query: "Is it safe at night in this destination?", icon: ShieldCheck },
-  { label: "Shorten to 3 days", query: "Can you shorten this itinerary to 3 days?", icon: Clock },
+  { label: "What is the best time to visit?", query: "What is the best time to visit?", icon: Calendar },
+  { label: "How to reach this city?", query: "How to reach this city by flight, train, bus?", icon: MapPin },
   { label: "Food & Culinary Spots", query: "Recommend top local food and culinary spots", icon: Utensils },
-  { label: "Best Month to Visit", query: "What is the best month to visit?", icon: Calendar },
+  { label: "Is it safe at night?", query: "Is it safe at night in this destination?", icon: ShieldCheck },
 ];
 
 function renderContent(text: string, onSelectPlan?: (planTitle: string) => void) {
   const lines = text.split("\n");
   return lines.map((line, i) => {
     // Action Plan Buttons: 👉 [Plan This Option — Select Flight Plan](/plan?option=flight...)
-    if (line.includes("[Plan This Option") || line.includes("👉 [Plan This")) {
+    if (line.includes("[Plan This Option") || line.includes("👉 [Plan This") || line.includes("Plan This ")) {
       const match = line.match(/\[(.*?)\]\((.*?)\)/);
       const buttonLabel = match ? match[1] : "Plan This Option";
       return (
-        <div key={i} className="my-2">
+        <div key={i} className="my-2.5">
           <button
             onClick={() => onSelectPlan && onSelectPlan(buttonLabel)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold shadow-sm transition-all active:scale-95 text-white"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold shadow-md transition-all active:scale-95 text-white hover:brightness-110"
             style={{ backgroundColor: "var(--color-accent)" }}
           >
-            <CheckCircle size={14} />
+            <CheckCircle size={15} />
             <span>{buttonLabel}</span>
           </button>
         </div>
+      );
+    }
+    // External Links: 🔗 [Search Flights on Google Flights](url)
+    if (line.includes("🔗 [") || (line.includes("[Search") && line.includes("http"))) {
+      const parts = line.split(/(\[.*?\]\(https?:\/\/[^\)]+\))/g);
+      return (
+        <p key={i} className="my-1.5 text-xs font-semibold flex flex-wrap items-center gap-2">
+          {parts.map((part, j) => {
+            const linkMatch = part.match(/^\[(.*?)\]\((https?:\/\/[^\)]+)\)$/);
+            if (linkMatch) {
+              const [_, label, url] = linkMatch;
+              return (
+                <a
+                  key={j}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 transition-colors font-medium text-xs"
+                >
+                  <span>{label}</span>
+                  <ExternalLink size={12} />
+                </a>
+              );
+            }
+            return <span key={j}>{part}</span>;
+          })}
+        </p>
       );
     }
     if (line.startsWith("### ")) {
@@ -72,7 +100,7 @@ function renderContent(text: string, onSelectPlan?: (planTitle: string) => void)
       );
     }
     if (line.trim() === "---") {
-      return <hr key={i} className="my-3" style={{ borderColor: "var(--color-border)" }} />;
+      return <hr key={i} className="my-3.5" style={{ borderColor: "var(--color-border)" }} />;
     }
     if (line.includes("**")) {
       const parts = line.split(/(\*\*[^*]+\*\*)/g);
@@ -88,18 +116,6 @@ function renderContent(text: string, onSelectPlan?: (planTitle: string) => void)
         </p>
       );
     }
-    if (line.startsWith("|")) {
-      const cells = line.split("|").filter(Boolean).map((c) => c.trim());
-      const isSeparator = cells.every((c) => /^[-:]+$/.test(c));
-      if (isSeparator) return null;
-      return (
-        <div key={i} className="flex gap-2 text-xs border-b py-1.5" style={{ borderColor: "var(--color-border)" }}>
-          {cells.map((cell, j) => (
-            <span key={j} className={`flex-1 ${j === 0 ? "font-medium" : ""}`}>{cell}</span>
-          ))}
-        </div>
-      );
-    }
     if (line.trim() === "") return <div key={i} className="h-1" />;
     return (
       <p key={i} className={`leading-relaxed ${line.startsWith("- ") || line.startsWith("• ") ? "ml-2" : ""}`}>
@@ -110,14 +126,32 @@ function renderContent(text: string, onSelectPlan?: (planTitle: string) => void)
 }
 
 function PlanPageInner() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const prefillDest = searchParams.get("destination") || "";
+  const prefillDest = searchParams.get("destination") || searchParams.get("dest") || "";
 
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME]);
-  const [input, setInput] = useState(prefillDest ? `I want to travel from Delhi to ${prefillDest}` : "");
+  const [input, setInput] = useState(prefillDest ? `I want to travel to ${prefillDest}` : "");
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingPlan, setPendingPlan] = useState<string | null>(null);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const { supabaseBrowser } = await import("@/lib/supabase");
+        const { data } = await supabaseBrowser.auth.getUser();
+        setUser(data.user);
+      } catch (err) {
+        console.error("Auth check failed:", err);
+      }
+    }
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -172,7 +206,14 @@ function PlanPageInner() {
   }
 
   function handleSelectPlan(planTitle: string) {
-    sendQuery(`I want to proceed with: "${planTitle}". Please lock this option and proceed to booking!`);
+    // REQUIRE AUTHENTICATION TO PLAN OR LOCK A TRIP
+    if (!user) {
+      setPendingPlan(planTitle);
+      setShowAuthModal(true);
+      return;
+    }
+
+    sendQuery(`I want to proceed with: "${planTitle}". Please lock this option and proceed to finalizing!`);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -199,6 +240,55 @@ function PlanPageInner() {
       style={{ backgroundColor: "var(--color-cream)", fontFamily: "var(--font-body)" }}
     >
       <Navbar />
+
+      {/* Auth Modal for Unauthenticated Users */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white max-w-md w-full rounded-[var(--radius-xl)] p-8 shadow-2xl relative space-y-6">
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1"
+              aria-label="Close"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+              <Lock size={28} />
+            </div>
+
+            <div className="text-center space-y-2">
+              <h3 className="text-2xl font-bold text-gray-900" style={{ fontFamily: "var(--font-display)" }}>
+                Sign In Required
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Please sign in or create an account to select, save, or finalize your trip plan:
+              </p>
+              {pendingPlan && (
+                <div className="p-3 bg-amber-50 rounded-lg text-xs font-semibold text-amber-900 border border-amber-200 mt-2">
+                  Selected: "{pendingPlan}"
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-3 pt-2">
+              <Link
+                href="/login?redirect=/plan"
+                className="w-full py-3 px-4 rounded-[var(--radius-md)] text-sm font-semibold text-center text-white flex items-center justify-center gap-2 transition-all active:scale-95"
+                style={{ backgroundColor: "var(--color-accent)" }}
+              >
+                <LogIn size={16} /> Sign In to Continue
+              </Link>
+              <Link
+                href="/signup?redirect=/plan"
+                className="w-full py-3 px-4 rounded-[var(--radius-md)] text-sm font-semibold text-center flex items-center justify-center gap-2 border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all active:scale-95"
+              >
+                <UserPlus size={16} /> Create Free Account
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Chat conversation area */}
       <div className="flex-1 overflow-y-auto px-4 pt-28 pb-6">
@@ -300,7 +390,7 @@ function PlanPageInner() {
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Plan a trip (e.g. Mumbai to Agra for 4 days with 2 friends, budget ₹40,000)"
+            placeholder="Ask a question or plan a trip (e.g. Plan a trip to Varanasi from Mumbai)"
             rows={1}
             disabled={isLoading}
             className="flex-1 px-5 py-3 text-sm rounded-[var(--radius-xl)] resize-none outline-none transition-all"
@@ -314,8 +404,8 @@ function PlanPageInner() {
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95 disabled:opacity-40"
-            style={{ backgroundColor: "var(--color-accent)", color: "white" }}
+            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95 disabled:opacity-40 text-white"
+            style={{ backgroundColor: "var(--color-accent)" }}
             aria-label="Send"
           >
             <Send size={16} />
@@ -334,10 +424,13 @@ function PlanPageInner() {
         <p className="text-xs text-center mt-2" style={{ color: "var(--color-muted)" }}>
           <MapPin size={11} className="inline mr-1" />
           Enter to send · Shift+Enter for line break ·{" "}
-          <Link href="/login" style={{ color: "var(--color-accent)" }}>
-            Sign in
-          </Link>{" "}
-          to save itineraries
+          {user ? (
+            <span className="text-emerald-700 font-semibold">Signed in as {user.email?.split("@")[0]}</span>
+          ) : (
+            <Link href="/login?redirect=/plan" style={{ color: "var(--color-accent)" }} className="font-semibold">
+              Sign in required to save trips
+            </Link>
+          )}
         </p>
       </div>
     </div>
@@ -346,7 +439,11 @@ function PlanPageInner() {
 
 export default function PlanPage() {
   return (
-    <Suspense>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin" />
+      </div>
+    }>
       <PlanPageInner />
     </Suspense>
   );

@@ -5,7 +5,7 @@
 
 import type { WeatherDay } from "@/types/chat";
 
-// Hardcoded coordinates lookup for common Indian travel destinations
+// Hardcoded coordinates lookup for Indian travel destinations
 const DESTINATION_COORDS: Record<string, { lat: number; lon: number }> = {
   goa: { lat: 15.4909, lon: 73.8278 },
   manali: { lat: 32.2432, lon: 77.1892 },
@@ -17,6 +17,20 @@ const DESTINATION_COORDS: Record<string, { lat: number; lon: number }> = {
   mumbai: { lat: 19.076, lon: 72.8777 },
   delhi: { lat: 28.6139, lon: 77.209 },
   bangalore: { lat: 12.9716, lon: 77.5946 },
+  varanasi: { lat: 25.3176, lon: 82.9739 },
+  amritsar: { lat: 31.634, lon: 74.8723 },
+  mysore: { lat: 12.2958, lon: 76.6394 },
+  hampi: { lat: 15.335, lon: 76.46 },
+  ooty: { lat: 11.4102, lon: 76.695 },
+  agra: { lat: 27.1767, lon: 78.0081 },
+  shimla: { lat: 31.1048, lon: 77.1734 },
+  coorg: { lat: 12.4244, lon: 75.7382 },
+  pondicherry: { lat: 11.9416, lon: 79.8083 },
+  darjeeling: { lat: 27.041, lon: 88.2663 },
+  andaman: { lat: 11.6233, lon: 92.7264 },
+  ladakh: { lat: 34.1526, lon: 77.5771 },
+  munnar: { lat: 10.0889, lon: 77.0595 },
+  kasol: { lat: 32.01, lon: 77.315 },
 };
 
 export async function fetchWeather(
@@ -25,7 +39,7 @@ export async function fetchWeather(
   endDate?: string
 ): Promise<WeatherDay[] | null> {
   const normalized = destination.toLowerCase().trim();
-  const coords = DESTINATION_COORDS[normalized] ?? DESTINATION_COORDS["goa"];
+  const coords = DESTINATION_COORDS[normalized] ?? DESTINATION_COORDS["mumbai"];
 
   try {
     const url = new URL("https://api.open-meteo.com/v1/forecast");
