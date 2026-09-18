@@ -1,7 +1,8 @@
 'use strict';
 module.exports = {
   State: require('./State'),
-  Destination: require('./Destination'),
+  DestinationCatalog: require('./DestinationCatalog'),
+  Destination: require('./DestinationCatalog'),
   Attraction: require('./Attraction'),
   PilgrimageSite: require('./PilgrimageSite'),
   Accommodation: require('./Accommodation'),

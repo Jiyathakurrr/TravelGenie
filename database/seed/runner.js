@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 const mongoose = require('mongoose');
 const models = require('../models');
 
@@ -66,8 +66,8 @@ async function runSeed() {
   // 1. States
   await bulkUpsert(models.State, states);
 
-  // 2. Destinations
-  await bulkUpsert(models.Destination, destinations);
+  // 2. Destination Catalog
+  await bulkUpsert(models.DestinationCatalog, destinations);
 
   // 3. Attractions
   await bulkUpsert(models.Attraction, attractions);

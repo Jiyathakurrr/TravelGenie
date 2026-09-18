@@ -20,7 +20,7 @@ const travelPackageSchema = new mongoose.Schema({
   title: { type: String, required: true },
   slug: { type: String, unique: true, required: true },
   stateIds: [{ type: String, ref: 'State' }],
-  destinationIds: [{ type: String, ref: 'Destination' }],
+  destinationIds: [{ type: String, ref: 'DestinationCatalog' }],
   itineraryTemplateId: { type: String, ref: 'ItineraryTemplate' },
   durationDays: { type: Number, required: true },
   price: {

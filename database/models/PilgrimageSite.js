@@ -20,7 +20,7 @@ const pilgrimageSiteSchema = new mongoose.Schema({
   name: { type: String, required: true },
   slug: { type: String, unique: true, required: true },
   stateId: { type: String, ref: 'State', required: true },
-  destinationId: { type: String, ref: 'Destination', required: true },
+  destinationId: { type: String, ref: 'DestinationCatalog', required: true },
   religion: { type: String, enum: ['Hindu', 'Muslim', 'Sikh', 'Christian', 'Buddhist', 'Jain', 'Other'], required: true },
   type: { type: String, enum: ['temple', 'mosque', 'church', 'gurudwara', 'monastery', 'shrine', 'dargah', 'synagogue', 'fire_temple', 'other'], required: true },
   location: {

@@ -18,7 +18,7 @@ const provenanceSchema = new mongoose.Schema({
 const busTerminalSchema = new mongoose.Schema({
   _id: { type: String, required: true },
   stateId: { type: String, ref: 'State', required: true },
-  destinationId: { type: String, ref: 'Destination' },
+  destinationId: { type: String, ref: 'DestinationCatalog' },
   name: { type: String, required: true },
   terminalCode: { type: String, unique: true, uppercase: true, required: true },
   city: { type: String, required: true },

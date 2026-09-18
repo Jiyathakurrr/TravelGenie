@@ -17,7 +17,7 @@ const provenanceSchema = new mongoose.Schema({
 
 const destinationSafetySchema = new mongoose.Schema({
   _id: { type: String, required: true },
-  destinationId: { type: String, ref: 'Destination', required: true, unique: true },
+  destinationId: { type: String, ref: 'DestinationCatalog', required: true, unique: true },
   stateId: { type: String, ref: 'State', required: true },
   overallRating: { type: Number, min: 1, max: 5, default: 4 },
   safetyNotes: [{ type: String }],

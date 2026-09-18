@@ -7,7 +7,7 @@
 
 ## Collections & Key Fields
 - `states`: `_id` (ISO code e.g. `IN-MH`), `name`, `code`, `type` (`STATE`|`UT`), `region`, `capital`.
-- `destinations`: `_id`, `stateId` (ref `states`), `name`, `type`, `location` (GeoJSON Point), `estimatedDailyBudget`, `budgetCategory`.
+- `destination_catalog`: `_id`, `stateId` (ref `states`), `name`, `type`, `location` (GeoJSON Point), `estimatedDailyBudget`, `budgetCategory`.
 - `attractions`: `_id`, `destinationId`, `stateId`, `name`, `category`, `entryFee`, `location`, `rating`.
 - `pilgrimage_sites`: `_id`, `destinationId`, `stateId`, `religion`, `deity`, `classificationStatus`, `classificationSource`, `location`.
 - `accommodations`: `_id`, `destinationId`, `stateId`, `type`, `pricePerNight` (`min`, `max`), `amenities`, `location`.
@@ -33,7 +33,7 @@
   - `accommodations.location`
   - `attractions.location`
   - `pilgrimage_sites.location`
-  - `destinations.location`
+  - `destination_catalog.location`
   - `airports.location`
   - `railway_stations.location`
   - `bus_terminals.location`

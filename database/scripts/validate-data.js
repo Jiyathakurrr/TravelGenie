@@ -24,7 +24,10 @@ async function runValidation() {
   // 1. Check Counts
   console.log('[1/8] Verifying Record Counts Across All 17 Collections...');
   const counts = {};
+  const seenCollections = new Set();
   for (const [name, model] of Object.entries(models)) {
+    if (seenCollections.has(model.collection.name)) continue;
+    seenCollections.add(model.collection.name);
     const c = await model.countDocuments();
     counts[model.collection.name] = c;
     console.log(`  - ${model.collection.name.padEnd(22)}: ${c} records`);
@@ -50,14 +53,14 @@ async function runValidation() {
   console.log('\n[3/8] Checking Referential Integrity (Orphan Detection)...');
   const stateIdSet = new Set(states.map(s => s._id));
 
-  const destinations = await models.Destination.find().lean();
+  const destinations = await (models.DestinationCatalog || models.Destination).find().lean();
   const destIdSet = new Set(destinations.map(d => d._id));
 
   let destOrphans = 0;
   destinations.forEach(d => {
     if (!stateIdSet.has(d.stateId)) destOrphans++;
   });
-  console.log(`  - Destination -> State orphans: ${destOrphans}`);
+  console.log(`  - DestinationCatalog -> State orphans: ${destOrphans}`);
   if (destOrphans > 0) passed = false;
 
   const attractions = await models.Attraction.find().lean();
@@ -146,7 +149,7 @@ async function runValidation() {
     }
   }
 
-  destinations.forEach(d => checkGeo(d, 'destinations'));
+  destinations.forEach(d => checkGeo(d, 'destination_catalog'));
   attractions.forEach(a => checkGeo(a, 'attractions'));
   accommodations.forEach(a => checkGeo(a, 'accommodations'));
   pilgrimages.forEach(p => checkGeo(p, 'pilgrimage_sites'));

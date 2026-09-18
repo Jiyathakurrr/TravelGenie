@@ -4,7 +4,7 @@ Live query results from MongoDB Atlas cluster (`travelgenie` database):
 
 - **Collection Counts (17 Collections, 6,767 Total Documents)**:
   - `states`: 36 (28 States + 8 Union Territories)
-  - `destinations`: 432 (12 distinct destinations per state/UT)
+  - `destination_catalog`: 432 (12 distinct destinations per state/UT)
   - `attractions`: 1,800
   - `pilgrimage_sites`: 540 (100% verified classification status and source)
   - `accommodations`: 1,008

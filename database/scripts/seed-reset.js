@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 const mongoose = require('mongoose');
 const models = require('../models');
 
@@ -13,7 +13,10 @@ async function resetSeedData() {
   await mongoose.connect(uri, { dbName });
 
   console.log('Resetting TravelGenie simulated seed data (Scoped strictly to TravelGenie seed collections)...');
+  const seenCollections = new Set();
   for (const [name, model] of Object.entries(models)) {
+    if (seenCollections.has(model.collection.name)) continue;
+    seenCollections.add(model.collection.name);
     const res = await model.deleteMany({ 'provenance.sourceType': 'SIMULATED' });
     console.log(`[RESET] ${model.collection.name.padEnd(22)}: deleted ${res.deletedCount} simulated records.`);
   }

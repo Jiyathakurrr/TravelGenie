@@ -18,7 +18,7 @@ const provenanceSchema = new mongoose.Schema({
 const accommodationSchema = new mongoose.Schema({
   _id: { type: String, required: true },
   stateId: { type: String, ref: 'State', required: true },
-  destinationId: { type: String, ref: 'Destination', required: true },
+  destinationId: { type: String, ref: 'DestinationCatalog', required: true },
   name: { type: String, required: true },
   slug: { type: String, unique: true, required: true },
   type: { type: String, enum: ['hotel', 'hostel', 'resort', 'homestay', 'lodge', 'guesthouse', 'villa', 'camping', 'boutique'], required: true },

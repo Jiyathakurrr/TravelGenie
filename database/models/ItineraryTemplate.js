@@ -35,7 +35,7 @@ const itineraryTemplateSchema = new mongoose.Schema({
   _id: { type: String, required: true },
   title: { type: String, required: true },
   slug: { type: String, unique: true, required: true },
-  destinationIds: [{ type: String, ref: 'Destination' }],
+  destinationIds: [{ type: String, ref: 'DestinationCatalog' }],
   stateIds: [{ type: String, ref: 'State' }],
   durationDays: { type: Number, required: true },
   theme: { type: String, enum: ['adventure', 'cultural', 'religious', 'nature', 'beach', 'heritage', 'family', 'honeymoon', 'solo', 'luxury', 'budget', 'wildlife', 'pilgrimage'], default: 'cultural' },

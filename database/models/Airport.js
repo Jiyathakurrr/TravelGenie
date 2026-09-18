@@ -18,7 +18,7 @@ const provenanceSchema = new mongoose.Schema({
 const airportSchema = new mongoose.Schema({
   _id: { type: String, required: true },
   stateId: { type: String, ref: 'State', required: true },
-  destinationId: { type: String, ref: 'Destination' },
+  destinationId: { type: String, ref: 'DestinationCatalog' },
   name: { type: String, required: true },
   iataCode: { type: String, unique: true, uppercase: true, required: true },
   icaoCode: { type: String, uppercase: true, default: '' },

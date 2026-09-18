@@ -25,7 +25,7 @@ const monthRatingSchema = new mongoose.Schema({
 
 const destinationSeasonSchema = new mongoose.Schema({
   _id: { type: String, required: true },
-  destinationId: { type: String, ref: 'Destination', required: true, unique: true },
+  destinationId: { type: String, ref: 'DestinationCatalog', required: true, unique: true },
   stateId: { type: String, ref: 'State', required: true },
   peakSeason: [monthRatingSchema],
   offSeason: [{ type: Number, min: 1, max: 12 }],
