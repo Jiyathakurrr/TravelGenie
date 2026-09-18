@@ -40,7 +40,7 @@ graph TD
 ## Technology Stack
 
 - **Frontend & API:** Next.js 14 (App Router), React, Tailwind CSS, TypeScript
-- **Database:** Supabase PostgreSQL
+- **Database:** MongoDB Atlas (Mongoose ODM) — see [database/DATABASE.md](database/DATABASE.md)
 - **Authentication:** Supabase Auth
 - **AI Integration:** Kimi API (Moonshot AI)
 - **Deployment:** Vercel (Hobby Tier)

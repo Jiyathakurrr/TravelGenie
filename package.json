@@ -1,0 +1,21 @@
+{
+  "name": "travelgenie",
+  "version": "1.0.0",
+  "description": "![License](https://img.shields.io/badge/license-MIT-blue.svg)\r ![Next.js](https://img.shields.io/badge/Next.js-14-black)\r ![Node.js](https://img.shields.io/badge/Node.js-20-green)\r ![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E)\r ![OpenAI](https://img.shields.io/badge/AI-OpenAI-412991)\r ![Status](https://img.shields.io/badge/Status-In%20Development-orange)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "node database/seed/runner.js",
+    "validate-data": "node database/scripts/validate-data.js",
+    "seed:reset": "node database/scripts/seed-reset.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^8.5.1"
+  }
+}
