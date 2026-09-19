@@ -1,7 +1,7 @@
 {
   "name": "travelgenie",
   "version": "1.0.0",
-  "description": "![License](https://img.shields.io/badge/license-MIT-blue.svg)\r ![Next.js](https://img.shields.io/badge/Next.js-14-black)\r ![Node.js](https://img.shields.io/badge/Node.js-20-green)\r ![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E)\r ![OpenAI](https://img.shields.io/badge/AI-OpenAI-412991)\r ![Status](https://img.shields.io/badge/Status-In%20Development-orange)",
+  "description": "TravelGenie AI Travel Companion — Next.js 16, Express, MongoDB Atlas, Cloudinary",
   "main": "index.js",
   "directories": {
     "doc": "docs"

@@ -10,16 +10,18 @@ This document details the technologies chosen for TravelGenie and the rationale 
 
 ## Backend
 - **Node.js:** JavaScript runtime environment allowing for a unified language across the stack.
-- **Express.js:** Lightweight and flexible web application framework for building robust REST APIs to handle custom logic not covered by Supabase directly.
+- **Express.js:** Lightweight and flexible web application framework for building robust REST APIs.
 
-## Database & Authentication
-- **Supabase PostgreSQL:** An open-source Firebase alternative. Provides a powerful relational database (PostgreSQL) which is essential for complex itinerary relationships.
-- **Supabase Auth:** Handles user authentication (Email/Password, OAuth) securely and integrates seamlessly with the PostgreSQL Row Level Security (RLS).
+## Database & Cloud Media
+- **MongoDB Atlas:** Cloud-hosted NoSQL document database providing flexible schema modeling, 2dsphere geospatial indexing, and high scalability for rich travel catalogs and user trip data.
+- **Mongoose 8.x:** Object Data Modeling (ODM) library providing schema validation, deterministic IDs, and relationship hooks.
+- **Cloudinary CDN:** High-performance media asset hosting and optimization for destination images, attraction photos, and accommodation media.
+- **Supabase Auth / JWT:** Authentication for user accounts and trip management.
 
 ## Artificial Intelligence
-- **OpenAI API (GPT-4-turbo):** Powers the core Trip Planning Engine and the AI Chatbot. Chosen for its superior natural language understanding and ability to output structured JSON data for direct database patching.
+- **Groq Cloud / OpenAI SDK:** Powers the core AI Trip Planning Engine and conversational chatbot with low-latency LLM inference (`openai/gpt-oss-120b` & `llama-3.3-70b-versatile`).
 
 ## Deployment & DevOps
 - **Vercel:** Optimal hosting platform for Next.js applications, providing edge network delivery and automatic CI/CD on Git push.
 - **Render:** Used to host the Express.js backend API, offering easy horizontal scaling and simple deployment flows.
-- **GitHub Actions:** Automates the testing pipeline before code is merged into the `develop` or `main` branches.
+- **GitHub Actions:** Automates the testing pipeline before code is merged into `main`.

@@ -13,7 +13,7 @@ This document outlines the strategic high-level roadmap for TravelGenie from inc
 ### Milestone 2: MVP Development - Core Modules (Weeks 3-6)
 - [ ] Implement Trip Planning Engine (destination, dates, budget).
 - [ ] Develop the Mock Budget Comparison Module (JSON files).
-- [ ] Setup Supabase PostgreSQL and authentication.
+- [x] Setup MongoDB Atlas database models and authentication.
 - [ ] Build base Next.js frontend structure.
 
 ### Milestone 3: AI & Chatbot Integration (Weeks 7-9)

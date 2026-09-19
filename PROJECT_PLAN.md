@@ -5,7 +5,7 @@
 | Week | Phase | Focus Area | Deliverables |
 | :--- | :--- | :--- | :--- |
 | 1-2 | **Planning** | Setup, Requirements, Architecture | Repo, Docs, Architecture Diagrams |
-| 3-4 | **Backend Base** | Supabase, Express setup | Auth, DB Schema, Endpoints |
+| 3-4 | **Backend Base** | Express, MongoDB Atlas setup | Auth, DB Schemas, Mongoose Models, Endpoints |
 | 5-6 | **Frontend Base** | Next.js setup, Trip Engine UI | UI Components, Mock data integration |
 | 7-8 | **AI Integration** | OpenAI connection, Prompts | AI Itinerary generation |
 | 9-10| **Chatbot** | Conversational UI, Intent parsing | Working Chatbot patching DB |

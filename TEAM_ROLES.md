@@ -24,7 +24,7 @@ The TravelGenie Capstone project is developed by a dedicated team of three membe
 - **Backend Development:** Implementing the Express.js server logic and API routes.
 - **Chatbot Development:** Integrating OpenAI and building the intent-parsing conversational interface.
 - **API Integration:** Connecting frontend to backend, and backend to third-party services.
-- **Database Integration:** Writing queries and connecting to Supabase.
+- **Database Integration:** Writing Mongoose queries and connecting to MongoDB Atlas.
 - **Quality Assurance:** Writing Unit and Integration tests. Bug tracking.
 - **GitHub Maintenance:** Maintaining repository health, reviewing PRs for code quality.
 
@@ -35,7 +35,7 @@ The TravelGenie Capstone project is developed by a dedicated team of three membe
 
 **Responsibilities:**
 - **System Architecture:** Designing the High-Level architecture and system flow.
-- **Database Design:** Creating the ER diagrams and implementing the Supabase PostgreSQL schema.
+- **Database Design:** Creating the ER diagrams and implementing the MongoDB Atlas schemas.
 - **Deployment:** Managing Vercel and Render deployments.
 - **DevOps:** Managing environment variables, secrets, and infrastructure.
 - **Hosting:** Ensuring uptime and monitoring resource usage.

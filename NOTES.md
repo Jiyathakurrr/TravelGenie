@@ -1,28 +1,26 @@
 # Project Notes & Hard Constraints
 
-This document clarifies key architectural and integration decisions for Travel Genie, specifically regarding simulated data and zero/low-cost tier limitations.
+This document clarifies key architectural decisions and integration guidelines for Travel Genie.
 
-## 1. AI Integration (Kimi API)
-- The project uses **Kimi API** (Moonshot AI) for all AI Chatbot and Itinerary Generation features.
-- We utilize the OpenAI npm SDK since Kimi's API is OpenAI-SDK compatible.
-- Requires `KIMI_API_KEY` to be set in `.env.local`.
+## 1. AI Integration (Groq & OpenAI SDK)
+- The project uses **Groq Cloud AI** with OpenAI SDK compatibility for fast LLM inference (`openai/gpt-oss-120b` primary model, `llama-3.3-70b-versatile` fallback).
+- Requires `GROQ_API_KEY` to be configured on the server environment (Render backend).
 
-## 2. Mock Data (Flights, Hotels, Trains)
-- **Important:** Amadeus self-service APIs were decommissioned on July 17, 2026. Do NOT attempt to integrate it.
-- All flight, hotel, and train search queries hit local Mock JSON files inside the repository (e.g. `data/trains.json`).
-- If the generated itinerary exceeds the user's budget, the backend flags the overage and suggests train alternatives. **It never auto-swaps the transport mode without explicit user confirmation.**
+## 2. Database Engine (MongoDB Atlas)
+- Uses **MongoDB Atlas v7+** with **Mongoose 8.x ODM**.
+- Schemas feature 2dsphere geospatial indexing for geographic queries (`$near`, `$geoWithin`).
+- Database configuration is managed in `backend/config/db.js` and `database/models/index.js`.
 
-## 3. Simulated Checkout (Razorpay)
-- Simulated checkouts use **Razorpay Test Mode** exclusively.
-- There are no real payment gateways or credential scraping features implemented.
+## 3. Media Storage (Cloudinary)
+- Media assets for destinations, attractions, and accommodations are managed via **Cloudinary CDN**.
+- Image metadata structures store `url`, `publicId`, `altText`, and `type`.
+- Configured in `backend/config/cloudinary.js`.
+
+## 4. Simulated Checkout (Razorpay)
+- Checkouts use **Razorpay Test Mode** (`rzp_test_*`).
 - Currency is fixed to **INR**.
-- A mock success/cancel screen concludes the booking module. 
+- Key configurations in `backend/config/razorpay.js`.
 
-## 4. Hosting & Vercel Limitations
-- Deployed on **Vercel Hobby tier**.
-- **Crucial Limitation:** Vercel Hobby limits serverless execution to 60 seconds.
-- Multi-call chains (like Itinerary Generation + Safety + Weather checks) must use streaming or client-side polling to avoid timeout errors.
-
-## 5. Free-Tier External APIs
-- Safety/Advisories: `Travel-Advisory.info` (Keyless)
-- Weather/Seasonality: `Open-Meteo` (Keyless)
+## 5. Deployment Architecture
+- **Frontend:** Next.js hosted on Vercel Edge Network.
+- **Backend:** Express.js REST API hosted on Render.

@@ -45,12 +45,12 @@ graph LR
 Before merging `develop` into `main` for a release, ensure the following checklist is completed:
 
 - [ ] **Tests Passing:** All GitHub Actions workflows are green.
-- [ ] **Environment Variables:** All required production keys (OpenAI, Supabase) are securely set in Vercel and Render dashboards.
-- [ ] **Database Migrations:** Any new Supabase tables, views, or RLS policies have been applied to the production database instance.
-- [ ] **Mock Data:** Ensure the mock JSON files (for the MVP budget module) are accessible by the production backend environment.
+- [ ] **Environment Variables:** All required production keys (Groq, Cloudinary, MongoDB URI, Razorpay) are securely set in Vercel and Render dashboards.
+- [ ] **Database Integrity:** Execute `npm run validate-data` to verify all 17+ Mongoose collection models and seed data integrity.
+- [ ] **Mock Data:** Ensure the seed data and Cloudinary image metadata are properly accessible by the production backend environment.
 - [ ] **Performance Audit:** Run Lighthouse on the staging deployment to ensure UX/UI guidelines are met.
 
 ## Hosting Platforms
 - **Frontend:** Vercel (Automatic deployments via GitHub integration on `main` branch).
 - **Backend:** Render (Web Service linked to the GitHub repository, deploying on `main` branch).
-- **Database:** Supabase Cloud.
+- **Database & CDN:** MongoDB Atlas Cluster & Cloudinary Media CDN.

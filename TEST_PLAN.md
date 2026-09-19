@@ -3,49 +3,33 @@
 This document defines the approach for validating the TravelGenie application to ensure high quality and reliability.
 
 ## Testing Objectives
-- Validate core business logic (Trip Engine, Chatbot).
+- Validate core business logic (Trip Engine, AI Chatbot, Geospatial Lookups).
 - Ensure UI responsiveness and accessibility.
-- Guarantee robust error handling, especially in the Booking Module.
+- Guarantee robust database integrity and schema validation.
 
-## 1. Unit Testing
-**Scope:** Individual functions, utilities, and isolated React components.
-**Tools:** Jest, React Testing Library.
+## 1. Unit & Schema Testing
+**Scope:** Mongoose schemas, seed data integrity, utility functions, and isolated React components.
+**Tools:** Jest / Vitest, custom validator scripts (`npm run validate-data`).
 **Strategy:**
-- Test all AI parser utility functions (e.g., ensuring OpenAI JSON strings are correctly parsed into objects).
-- Test Next.js UI components for correct rendering with mock props.
+- Run automated schema validation scripts to verify referential integrity across MongoDB collections (0 orphan records).
+- Test Next.js UI components for correct rendering.
 - Test Express.js controller logic in isolation.
 
 ## 2. Integration Testing
-**Scope:** Interactions between the frontend and backend, and backend to the database.
-**Tools:** Supertest (for Express APIs), Jest.
+**Scope:** Interactions between frontend and backend REST endpoints, and backend to MongoDB Atlas.
+**Tools:** Supertest (for Express APIs), Vitest.
 **Strategy:**
-- Mock the OpenAI API response to prevent costs during CI/CD.
-- Use a dedicated Supabase testing environment/schema to test database inserts and RLS policies.
-- Ensure the Chatbot endpoint successfully patches an itinerary in the database.
+- Test AI API endpoints using fallback models for CI reliability.
+- Verify MongoDB CRUD operations for `saved_trips`, `conversations`, and `users`.
 
 ## 3. Manual Testing
 **Scope:** Exploratory testing of the application from a user's perspective.
 **Strategy:**
-- Jiya will perform cross-browser testing (Chrome, Safari, Firefox) for UI consistency.
+- Perform cross-browser testing (Chrome, Safari, Firefox) for UI consistency.
 - Test responsive layouts on mobile device simulators.
 - Verify that the chat interface feels natural and responsive.
 
-## 4. Regression Testing
-**Scope:** Ensuring new code does not break existing features.
+## 4. Database Integrity Verification
+**Scope:** Ensuring seed generators and live database collections contain zero invalid records, corrupt coordinates, or missing foreign keys.
 **Strategy:**
-- Automated via GitHub Actions on every Pull Request.
-- All Unit and Integration tests must pass before a merge to `develop` is allowed.
-
-## 5. Acceptance Testing
-**Scope:** Validating that the product meets the business requirements defined in `REQUIREMENTS.md`.
-**Strategy:**
-- Prachi (Product Manager) will conduct User Acceptance Testing (UAT) at the end of each sprint.
-- Focus on the "Happy Path": generating a trip, modifying it via chat, and reaching the booking confirmation screen.
-
-## 6. Bug Reporting
-When a bug is found, it must be documented using the GitHub Issue **Bug Report** template.
-**Required fields:**
-- Steps to reproduce
-- Expected vs. Actual behavior
-- Screenshots/Screen recordings
-- Environment details (Browser, OS)
+- Execute `npm run validate-data` prior to pushing to `main`.

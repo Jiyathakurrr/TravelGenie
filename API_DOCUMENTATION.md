@@ -2,7 +2,7 @@
 
 This document outlines the core RESTful endpoints exposed by the Express.js backend.
 
-*Note: All endpoints require a valid Supabase JWT Bearer token in the `Authorization` header.*
+*Note: Endpoints requiring authentication accept a Bearer JWT token in the `Authorization` header.*
 
 ## Itinerary Endpoints
 

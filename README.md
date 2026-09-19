@@ -1,11 +1,11 @@
 # TravelGenie - Your AI Travel Companion
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![Node.js](https://img.shields.io/badge/Node.js-20-green)
-![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E)
-![OpenAI](https://img.shields.io/badge/AI-OpenAI-412991)
-![Status](https://img.shields.io/badge/Status-In%20Development-orange)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-Media-3448C5)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
 ## Introduction
 
@@ -13,132 +13,96 @@ Welcome to **TravelGenie**, an AI-powered travel planning platform designed to r
 
 ## Project Goals
 
-- **Intelligent Itinerary Generation:** Automate trip planning based on destination, dates, budget, and preferences.
-- **Cost Optimization:** Compare flights, hotels, and packages to rank options according to user budgets.
-- **Conversational Interface:** Provide an intuitive AI chatbot to modify itineraries on the fly and patch them directly to the database.
-- **Seamless Booking Experience:** Gracefully handle price fluctuations and availability issues during the booking process without redirecting users abruptly.
+- 🧠 **Intelligent Itinerary Generation:** Automate trip planning based on destination, dates, budget, transport, and personal preferences.
+- 💰 **Cost Optimization:** Compare flights, trains, buses, hotels, and packages to rank options according to user budgets.
+- 💬 **Conversational Interface:** Provide an intuitive AI chatbot to modify itineraries on the fly and synchronize with MongoDB storage.
+- 🖼️ **Rich Media Integration:** Cloudinary CDN hosting for destination, attraction, and hotel visual assets.
+- 💳 **Seamless Booking Experience:** Integrated test-mode payment processing via Razorpay.
 
 ## Key Features
 
-- 🧠 **Trip Planning Engine:** AI-driven scheduling that accounts for user constraints.
-- 💰 **Budget Comparison Module:** Local mock JSON-based budget analysis (MVP phase) for flights, hotels, and packages.
-- 💬 **AI Chatbot:** OpenAI-integrated chatbot capable of reading the itinerary and suggesting or applying real-time modifications.
-- 🏨 **Resilient Booking Module:** Handles edge cases like unavailable hotels and flights with inline error management.
-- 🗄️ **Itinerary Versioning:** Stores multiple versions of an itinerary as the user converses with the AI.
+- 🗺️ **Comprehensive Destination Catalog:** 17+ Mongoose collection models covering Indian states, destinations, attractions, pilgrimage sites, airports, railway stations, bus terminals, and routes.
+- 📍 **Geospatial Search:** 2dsphere indexing for radius-based attraction and hotel discovery (`$near`, `$geoWithin`).
+- ⚡ **Groq AI Integration:** Ultra-fast LLM itinerary generation and chat response streaming.
+- 🗄️ **MongoDB Atlas & Mongoose 8.x:** Deterministic document ID strategy with zero orphan records and provenance tracking.
 
 ## Architecture Overview
 
 ```mermaid
 graph TD
-    Client[Next.js App Router (Frontend)] --> |API Routes| Server[Next.js API Handlers]
-    Server --> |Auth & DB Queries| DB[(Supabase PostgreSQL)]
-    Server --> |AI Prompts| AI[Kimi API (Moonshot AI)]
-    Client --> |Conversational Edits| Chatbot[AI Chatbot Module]
+    Client[Next.js App Router (Frontend)] --> |REST API| Server[Express.js Server (Backend)]
+    Server --> |Mongoose ODM| DB[(MongoDB Atlas)]
+    Server --> |Media Uploads| CDN[Cloudinary CDN]
+    Server --> |AI Prompts| AI[Groq Cloud AI]
 ```
-*For a detailed high-level architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).*
+*For detailed architecture diagrams, see [ARCHITECTURE.md](ARCHITECTURE.md) and [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md).*
 
 ## Technology Stack
 
-- **Frontend & API:** Next.js 14 (App Router), React, Tailwind CSS, TypeScript
+- **Frontend:** Next.js (App Router), React, Tailwind CSS, TypeScript
+- **Backend:** Express.js, Node.js REST API (`/backend`)
 - **Database:** MongoDB Atlas (Mongoose ODM) — see [database/DATABASE.md](database/DATABASE.md)
-- **Authentication:** Supabase Auth
-- **AI Integration:** Kimi API (Moonshot AI)
-- **Deployment:** Vercel (Hobby Tier)
-- **Payments:** Razorpay Test Mode (Simulated Checkout)
+- **Media CDN:** Cloudinary — see [backend/config/cloudinary.js](backend/config/cloudinary.js)
+- **AI Integration:** Groq Cloud AI / OpenAI SDK
+- **Payments:** Razorpay Test Mode
 
 ## Folder Structure
 
 ```mermaid
 graph LR
-    A[TravelGenie] --> B(docs)
-    A --> C(frontend)
-    A --> D(backend)
-    A --> E(database)
-    A --> F(chatbot)
+    A[TravelGenie] --> B(frontend)
+    A --> C(backend)
+    A --> D(database)
+    A --> E(chatbot)
+    A --> F(docs)
     A --> G(testing)
     A --> H(.github)
 ```
 
 | Directory | Purpose |
 | --- | --- |
-| `/docs` | Comprehensive project documentation, diagrams, sprint plans, and research. |
 | `/frontend` | Next.js application codebase. |
-| `/backend` | Express.js API and server logic. |
-| `/database` | Database schemas, migrations, and seed data. |
-| `/chatbot` | AI conversation logic and itinerary modification scripts. |
-| `/testing` | E2E, Integration, and Unit tests. |
-| `/.github` | CI/CD workflows, issue templates, and PR templates. |
+| `/backend` | Express.js REST API server logic, models, and middleware. |
+| `/database` | MongoDB models, seed generators, data integrity validators (`database/DATABASE.md`). |
+| `/chatbot` | AI conversation logic and prompt engineering scripts. |
+| `/docs` | System documentation, diagrams, sprint records. |
+| `/testing` | Automated test suites and test plan documents. |
 
-## Development Roadmap
-
-Please refer to our detailed [ROADMAP.md](ROADMAP.md) and [PROJECT_PLAN.md](PROJECT_PLAN.md) for milestone tracking.
-
-## Installation Instructions
+## Installation & Setup
 
 ### Prerequisites
 - Node.js (v18 or higher)
 - npm or yarn
-- Git
-- Supabase account & project setup
-- Kimi API Key (Moonshot AI)
-- Razorpay Test Credentials
+- MongoDB Atlas Cluster or local MongoDB instance
 
 ### Setup Steps
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-org/TravelGenie.git
+   git clone https://github.com/Jiyathakurrr/TravelGenie.git
    cd TravelGenie
    ```
 2. **Environment Variables:**
-   Copy `.env.example` to `.env` in both frontend and backend directories and populate your Supabase and OpenAI keys.
-   ```bash
-   cp .env.example .env
+   Populate `.env` in the root/backend directories following `.env.example`:
+   ```env
+   MONGODB_URI=your_mongodb_connection_string
+   MONGODB_DB_NAME=travelgenie
+   CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+   CLOUDINARY_API_KEY=your_cloudinary_key
+   CLOUDINARY_API_SECRET=your_cloudinary_secret
    ```
-3. **Install Dependencies:**
+3. **Seed Database:**
    ```bash
-   # Frontend
-   cd frontend
-   npm install
-
-   # Backend
-   cd ../backend
-   npm install
+   npm run seed
+   npm run validate-data
    ```
-4. **Run Locally:**
+4. **Run Backend & Frontend:**
    ```bash
-   # Run Backend (Terminal 1)
-   npm run dev
+   # Run Backend
+   cd backend && npm run dev
 
-   # Run Frontend (Terminal 2)
-   cd ../frontend
-   npm run dev
+   # Run Frontend
+   cd ../frontend && npm run dev
    ```
-
-## Contributors
-
-The TravelGenie platform is developed and maintained by:
-
-- **Prachi** - *Product Manager & Research Coordinator* (Product decisions, sprint planning, documentation)
-- **Jiya** - *Developer & Tester* (Full-stack development, AI chatbot, database integration, QA)
-- **Hitanshi** - *System Designer & Deployer* (Architecture, DB design, CI/CD, DevOps)
-
-See [TEAM_ROLES.md](TEAM_ROLES.md) for detailed responsibilities.
-
-## Future Scope
-
-- Integration with real flight/hotel APIs (e.g., Amadeus, Skyscanner).
-- Collaborative trip planning for groups.
-- Mobile application development (React Native).
-- Offline mode for viewing itineraries while traveling.
-
-
-## FAQ
-
-**Q: Is the Budget Comparison Module using live data?**
-A: For the MVP, we are using mock JSON files to simulate flight and hotel data to ensure robust system testing before integrating paid live APIs.
-
-**Q: How does the AI chatbot modify the database directly?**
-A: The chatbot translates user intent into JSON patches, which the backend validates and applies to the Supabase database as a new itinerary version.
 
 ## License
 
