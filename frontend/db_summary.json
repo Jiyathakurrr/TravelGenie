@@ -1,0 +1,1826 @@
+{
+  "accommodations": {
+    "count": 1008,
+    "sample": [
+      {
+        "_id": "acc-acc-visakhapatnam-grand-palace-hotel-1",
+        "__v": 0,
+        "address": "10, Tourism Corridor, Visakhapatnam, Andhra Pradesh - 500010",
+        "amenities": [
+          "Wi-Fi",
+          "Air Conditioning",
+          "Complimentary Breakfast",
+          "24/7 Room Service",
+          "Travel Desk"
+        ],
+        "budgetCategory": "mid",
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "createdAt": "2026-09-17T09:51:43.710Z",
+        "currency": "INR",
+        "destinationId": "dest-visakhapatnam-ap",
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_acc-visakhapatnam-grand-palace-hotel-1.jpg",
+            "publicId": "placeholder_acc-visakhapatnam-grand-palace-hotel-1",
+            "altText": "Visakhapatnam Grand Palace Hotel #1 exterior in Visakhapatnam",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            79.68,
+            15.08
+          ]
+        },
+        "name": "Visakhapatnam Grand Palace Hotel #1",
+        "nearbyAttractionIds": [],
+        "pricePerNight": {
+          "min": 3200,
+          "max": 6500
+        },
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "acc-visakhapatnam-grand-palace-hotel-1",
+        "starRating": 4,
+        "stateId": "state-ap",
+        "tags": [
+          "hotel",
+          "mid",
+          "accommodation",
+          "verified-stay"
+        ],
+        "type": "hotel",
+        "updatedAt": "2026-09-17T09:51:43.710Z"
+      },
+      {
+        "_id": "acc-acc-vijayawada-royal-heritage-resort-1",
+        "__v": 0,
+        "address": "11, Tourism Corridor, Vijayawada, Andhra Pradesh - 500011",
+        "amenities": [
+          "Wi-Fi",
+          "Air Conditioning",
+          "Complimentary Breakfast",
+          "24/7 Room Service",
+          "Travel Desk"
+        ],
+        "budgetCategory": "luxury",
+        "checkInTime": "14:00",
+        "checkOutTime": "11:00",
+        "createdAt": "2026-09-17T09:51:43.710Z",
+        "currency": "INR",
+        "destinationId": "dest-vijayawada-ap",
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_acc-vijayawada-royal-heritage-resort-1.jpg",
+            "publicId": "placeholder_acc-vijayawada-royal-heritage-resort-1",
+            "altText": "Vijayawada Royal Heritage Resort #1 exterior in Vijayawada",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            81.068,
+            15.32
+          ]
+        },
+        "name": "Vijayawada Royal Heritage Resort #1",
+        "nearbyAttractionIds": [],
+        "pricePerNight": {
+          "min": 7500,
+          "max": 16000
+        },
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "acc-vijayawada-royal-heritage-resort-1",
+        "starRating": 5,
+        "stateId": "state-ap",
+        "tags": [
+          "resort",
+          "luxury",
+          "accommodation",
+          "verified-stay"
+        ],
+        "type": "resort",
+        "updatedAt": "2026-09-17T09:51:43.710Z"
+      }
+    ]
+  },
+  "buses": {
+    "count": 520,
+    "sample": [
+      {
+        "_id": "bus-bus-msr-101",
+        "__v": 0,
+        "arrivalTime": "07:00",
+        "availability": 28,
+        "busNumber": "BUS-MSR-101",
+        "createdAt": "2026-09-17T09:51:46.647Z",
+        "currency": "INR",
+        "departureTime": "18:15",
+        "destinationTerminalId": "bst-isbt-anvr",
+        "durationMins": 133,
+        "fare": {
+          "seater": 470,
+          "semi_sleeper": 611,
+          "sleeper": 799
+        },
+        "operator": "MSRTC",
+        "originTerminalId": "bst-isbt-kash",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "serviceFees": 30,
+        "status": "scheduled",
+        "taxes": 50,
+        "type": "luxury",
+        "updatedAt": "2026-09-17T09:51:46.647Z"
+      },
+      {
+        "_id": "bus-bus-zin-102",
+        "__v": 0,
+        "arrivalTime": "08:00",
+        "availability": 28,
+        "busNumber": "BUS-ZIN-102",
+        "createdAt": "2026-09-17T09:51:46.647Z",
+        "currency": "INR",
+        "departureTime": "18:30",
+        "destinationTerminalId": "bst-bst-mum-bct",
+        "durationMins": 146,
+        "fare": {
+          "seater": 490,
+          "semi_sleeper": 637,
+          "sleeper": 833
+        },
+        "operator": "Zingbus",
+        "originTerminalId": "bst-isbt-kash",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "serviceFees": 30,
+        "status": "scheduled",
+        "taxes": 50,
+        "type": "sleeper",
+        "updatedAt": "2026-09-17T09:51:46.647Z"
+      }
+    ]
+  },
+  "tags": {
+    "count": 24,
+    "sample": [
+      {
+        "_id": "tag-hill-station",
+        "__v": 0,
+        "category": "destination",
+        "createdAt": "2026-09-17T09:51:48.417Z",
+        "description": "Serene elevated towns with temperate mountain climates",
+        "name": "Hill Station",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "hill-station",
+        "updatedAt": "2026-09-17T09:51:48.417Z",
+        "usageCount": 19
+      },
+      {
+        "_id": "tag-beach-paradise",
+        "__v": 0,
+        "category": "destination",
+        "createdAt": "2026-09-17T09:51:48.417Z",
+        "description": "Sun-drenched coastlines and tropical waters",
+        "name": "Beach Paradise",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "beach-paradise",
+        "updatedAt": "2026-09-17T09:51:48.417Z",
+        "usageCount": 33
+      }
+    ]
+  },
+  "destination_catalog": {
+    "count": 432,
+    "sample": [
+      {
+        "_id": "dest-visakhapatnam-ap",
+        "__v": 0,
+        "bestTimeToVisit": [
+          "October",
+          "November",
+          "December",
+          "January",
+          "February",
+          "March"
+        ],
+        "budgetCategory": "budget",
+        "createdAt": "2026-09-17T09:51:41.134Z",
+        "currency": "INR",
+        "description": "Visakhapatnam is a premier heritage destination in Andhra Pradesh, celebrated for its rich culture, scenic landscapes, and welcoming heritage.",
+        "estimatedDailyBudget": {
+          "budget": 600,
+          "mid": 1200,
+          "luxury": 3360
+        },
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_visakhapatnam-ap.jpg",
+            "publicId": "placeholder_visakhapatnam-ap",
+            "altText": "Visakhapatnam in Andhra Pradesh",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            79.7,
+            15.1
+          ]
+        },
+        "name": "Visakhapatnam",
+        "nearbyAttractionIds": [],
+        "nearbyTransportIds": [],
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "visakhapatnam-ap",
+        "stateId": "state-ap",
+        "tags": [
+          "heritage",
+          "south",
+          "culture",
+          "scenic"
+        ],
+        "type": "heritage",
+        "updatedAt": "2026-09-17T09:51:41.134Z"
+      },
+      {
+        "_id": "dest-vijayawada-ap",
+        "__v": 0,
+        "bestTimeToVisit": [
+          "October",
+          "November",
+          "December",
+          "January",
+          "February",
+          "March"
+        ],
+        "budgetCategory": "mid",
+        "createdAt": "2026-09-17T09:51:41.134Z",
+        "currency": "INR",
+        "description": "Vijayawada is a premier wildlife destination in Andhra Pradesh, celebrated for its rich culture, scenic landscapes, and welcoming heritage.",
+        "estimatedDailyBudget": {
+          "budget": 1500,
+          "mid": 3000,
+          "luxury": 8400
+        },
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_vijayawada-ap.jpg",
+            "publicId": "placeholder_vijayawada-ap",
+            "altText": "Vijayawada in Andhra Pradesh",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            81.06,
+            15.34
+          ]
+        },
+        "name": "Vijayawada",
+        "nearbyAttractionIds": [],
+        "nearbyTransportIds": [],
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "vijayawada-ap",
+        "stateId": "state-ap",
+        "tags": [
+          "wildlife",
+          "south",
+          "culture",
+          "scenic"
+        ],
+        "type": "wildlife",
+        "updatedAt": "2026-09-17T09:51:41.134Z"
+      }
+    ]
+  },
+  "travel_packages": {
+    "count": 108,
+    "sample": [
+      {
+        "_id": "pkg-pkg-signature-3-day-pilgrimage-odyssey-in-visakhapatnam-andhra-pradesh-tour-package",
+        "__v": 0,
+        "budgetCategory": "budget",
+        "createdAt": "2026-09-17T09:51:48.287Z",
+        "currency": "INR",
+        "destinationIds": [
+          "dest-visakhapatnam-ap",
+          "dest-vijayawada-ap"
+        ],
+        "durationDays": 3,
+        "exclusions": [
+          "Airfare or Train Tickets to Destination Hub",
+          "Monument Entrance Video Camera Permits",
+          "Discretionary Tips and Personal Incidental Expenses",
+          "Optional Adventure Sports and Activity Add-ons"
+        ],
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_pkg_pkg-signature-3-day-pilgrimage-odyssey-in-visakhapatnam-andhra-pradesh-tour-package.jpg",
+            "publicId": "placeholder_pkg_pkg-signature-3-day-pilgrimage-odyssey-in-visakhapatnam-andhra-pradesh-tour-package",
+            "altText": "Signature 3-Day PILGRIMAGE Odyssey in Visakhapatnam, Andhra Pradesh Tour Package highlight",
+            "type": "hero"
+          }
+        ],
+        "inclusions": [
+          "3-Star or 4-Star Premium Hotel Accommodations",
+          "Daily Gourmet Buffet Breakfast",
+          "Dedicated Chauffeur-Driven AC Private Vehicle",
+          "Authorized Government Tour Guide Fees",
+          "All Tolls, Parking, and Inter-State Taxes"
+        ],
+        "isActive": true,
+        "itineraryTemplateId": "itin-itin-3-day-pilgrimage-odyssey-in-visakhapatnam-andhra-pradesh",
+        "price": {
+          "min": 7590,
+          "max": 12375
+        },
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "pkg-signature-3-day-pilgrimage-odyssey-in-visakhapatnam-andhra-pradesh-tour-package",
+        "stateIds": [
+          "state-ap"
+        ],
+        "tags": [
+          "pilgrimage",
+          "budget",
+          "packaged-tour",
+          "featured"
+        ],
+        "title": "Signature 3-Day PILGRIMAGE Odyssey in Visakhapatnam, Andhra Pradesh Tour Package",
+        "updatedAt": "2026-09-17T09:51:48.287Z"
+      },
+      {
+        "_id": "pkg-pkg-signature-5-day-nature-odyssey-in-tirupati-andhra-pradesh-tour-package",
+        "__v": 0,
+        "budgetCategory": "luxury",
+        "createdAt": "2026-09-17T09:51:48.287Z",
+        "currency": "INR",
+        "destinationIds": [
+          "dest-tirupati-ap",
+          "dest-araku-valley-ap"
+        ],
+        "durationDays": 5,
+        "exclusions": [
+          "Airfare or Train Tickets to Destination Hub",
+          "Monument Entrance Video Camera Permits",
+          "Discretionary Tips and Personal Incidental Expenses",
+          "Optional Adventure Sports and Activity Add-ons"
+        ],
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_pkg_pkg-signature-5-day-nature-odyssey-in-tirupati-andhra-pradesh-tour-package.jpg",
+            "publicId": "placeholder_pkg_pkg-signature-5-day-nature-odyssey-in-tirupati-andhra-pradesh-tour-package",
+            "altText": "Signature 5-Day NATURE Odyssey in Tirupati, Andhra Pradesh Tour Package highlight",
+            "type": "hero"
+          }
+        ],
+        "inclusions": [
+          "3-Star or 4-Star Premium Hotel Accommodations",
+          "Daily Gourmet Buffet Breakfast",
+          "Dedicated Chauffeur-Driven AC Private Vehicle",
+          "Authorized Government Tour Guide Fees",
+          "All Tolls, Parking, and Inter-State Taxes"
+        ],
+        "isActive": true,
+        "itineraryTemplateId": "itin-itin-5-day-nature-odyssey-in-tirupati-andhra-pradesh",
+        "price": {
+          "min": 54625,
+          "max": 89063
+        },
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "pkg-signature-5-day-nature-odyssey-in-tirupati-andhra-pradesh-tour-package",
+        "stateIds": [
+          "state-ap"
+        ],
+        "tags": [
+          "nature",
+          "luxury",
+          "packaged-tour",
+          "featured"
+        ],
+        "title": "Signature 5-Day NATURE Odyssey in Tirupati, Andhra Pradesh Tour Package",
+        "updatedAt": "2026-09-17T09:51:48.287Z"
+      }
+    ]
+  },
+  "trains": {
+    "count": 520,
+    "sample": [
+      {
+        "_id": "trn-12001",
+        "__v": 0,
+        "arrivalTime": "11:25",
+        "availability": {
+          "sleeper": 150,
+          "ac3tier": 60,
+          "ac2tier": 24,
+          "acFirstClass": 10
+        },
+        "createdAt": "2026-09-17T09:51:46.306Z",
+        "currency": "INR",
+        "departureTime": "05:10",
+        "destinationStationId": "stn-csmt",
+        "durationMins": 203,
+        "fare": {
+          "sleeper": 465,
+          "ac3tier": 1162.5,
+          "ac2tier": 1767,
+          "acFirstClass": 2883
+        },
+        "originStationId": "stn-ndls",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "serviceFees": 40,
+        "status": "running",
+        "taxes": 95,
+        "trainName": "Delhi - Mumbai EXPRESS",
+        "trainNumber": "12001",
+        "type": "express",
+        "updatedAt": "2026-09-17T09:51:46.306Z"
+      },
+      {
+        "_id": "trn-12002",
+        "__v": 0,
+        "arrivalTime": "11:50",
+        "availability": {
+          "sleeper": 150,
+          "ac3tier": 60,
+          "ac2tier": 24,
+          "acFirstClass": 10
+        },
+        "createdAt": "2026-09-17T09:51:46.306Z",
+        "currency": "INR",
+        "departureTime": "05:20",
+        "destinationStationId": "stn-hwh",
+        "durationMins": 226,
+        "fare": {
+          "sleeper": 480,
+          "ac3tier": 1200,
+          "ac2tier": 1824,
+          "acFirstClass": 2976
+        },
+        "originStationId": "stn-ndls",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "serviceFees": 40,
+        "status": "running",
+        "taxes": 95,
+        "trainName": "Delhi - Kolkata RAJDHANI",
+        "trainNumber": "12002",
+        "type": "rajdhani",
+        "updatedAt": "2026-09-17T09:51:46.306Z"
+      }
+    ]
+  },
+  "bus_terminals": {
+    "count": 25,
+    "sample": [
+      {
+        "_id": "bst-isbt-kash",
+        "__v": 0,
+        "city": "Delhi",
+        "createdAt": "2026-09-17T09:51:45.665Z",
+        "destinationId": "dest-old-delhi-heritage-quarter-dl",
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_bst_isbt-kash.jpg",
+            "publicId": "placeholder_bst_isbt-kash",
+            "altText": "Maharana Pratap ISBT Kashmiri Gate platform",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.2285,
+            28.6675
+          ]
+        },
+        "name": "Maharana Pratap ISBT Kashmiri Gate",
+        "platforms": 16,
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "stateId": "ut-dl",
+        "terminalCode": "ISBT-KASH",
+        "type": "inter-state",
+        "updatedAt": "2026-09-17T09:51:45.665Z"
+      },
+      {
+        "_id": "bst-isbt-anvr",
+        "__v": 0,
+        "city": "Delhi",
+        "createdAt": "2026-09-17T09:51:45.665Z",
+        "destinationId": "dest-old-delhi-heritage-quarter-dl",
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_bst_isbt-anvr.jpg",
+            "publicId": "placeholder_bst_isbt-anvr",
+            "altText": "Swami Vivekananda ISBT Anand Vihar platform",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.316,
+            28.647
+          ]
+        },
+        "name": "Swami Vivekananda ISBT Anand Vihar",
+        "platforms": 16,
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "stateId": "ut-dl",
+        "terminalCode": "ISBT-ANVR",
+        "type": "inter-state",
+        "updatedAt": "2026-09-17T09:51:45.665Z"
+      }
+    ]
+  },
+  "transport_routes": {
+    "count": 108,
+    "sample": [
+      {
+        "_id": "route-rt-flight-ap-ar-1",
+        "__v": 0,
+        "createdAt": "2026-09-17T09:51:47.212Z",
+        "currency": "INR",
+        "destination": {
+          "name": "Arunachal Pradesh Hub",
+          "stateId": "state-ar",
+          "coordinates": [
+            78.5,
+            21
+          ]
+        },
+        "distanceKm": 250,
+        "estimatedDurationMins": 90,
+        "estimatedTransportCost": {
+          "min": 3500,
+          "max": 9000
+        },
+        "frequency": "daily",
+        "origin": {
+          "name": "Andhra Pradesh Hub",
+          "stateId": "state-ap",
+          "coordinates": [
+            78,
+            20
+          ]
+        },
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "providers": [
+          "National Transport Network"
+        ],
+        "routeCode": "RT-FLIGHT-AP-AR-1",
+        "type": "flight",
+        "updatedAt": "2026-09-17T09:51:47.212Z"
+      },
+      {
+        "_id": "route-rt-train-ap-ar-2",
+        "__v": 0,
+        "createdAt": "2026-09-17T09:51:47.212Z",
+        "currency": "INR",
+        "destination": {
+          "name": "Arunachal Pradesh Hub",
+          "stateId": "state-ar",
+          "coordinates": [
+            78.5,
+            21
+          ]
+        },
+        "distanceKm": 250,
+        "estimatedDurationMins": 360,
+        "estimatedTransportCost": {
+          "min": 600,
+          "max": 2400
+        },
+        "frequency": "daily",
+        "origin": {
+          "name": "Andhra Pradesh Hub",
+          "stateId": "state-ap",
+          "coordinates": [
+            78,
+            20
+          ]
+        },
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "providers": [
+          "National Transport Network"
+        ],
+        "routeCode": "RT-TRAIN-AP-AR-2",
+        "type": "train",
+        "updatedAt": "2026-09-17T09:51:47.212Z"
+      }
+    ]
+  },
+  "attractions": {
+    "count": 1800,
+    "sample": [
+      {
+        "_id": "attr-attr-visakhapatnam-heritage-fort-ramparts",
+        "__v": 0,
+        "budgetCategory": "budget",
+        "createdAt": "2026-09-17T09:51:41.704Z",
+        "description": "Explore Visakhapatnam Heritage Fort & Ramparts in Visakhapatnam, an iconic fort showcasing regional architecture and natural wonder.",
+        "destinationId": "dest-visakhapatnam-ap",
+        "entryFee": {
+          "adult": 50,
+          "child": 25,
+          "foreign": 300,
+          "currency": "INR"
+        },
+        "estimatedDurationMins": 150,
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_attr-visakhapatnam-heritage-fort-ramparts.jpg",
+            "publicId": "placeholder_attr-visakhapatnam-heritage-fort-ramparts",
+            "altText": "Visakhapatnam Heritage Fort & Ramparts view",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            79.68,
+            15.08
+          ]
+        },
+        "name": "Visakhapatnam Heritage Fort & Ramparts",
+        "nearbyAttractionIds": [],
+        "openingHours": "09:00 AM - 06:00 PM",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "attr-visakhapatnam-heritage-fort-ramparts",
+        "stateId": "state-ap",
+        "tags": [
+          "fort",
+          "budget",
+          "sightseeing",
+          "heritage"
+        ],
+        "type": "fort",
+        "updatedAt": "2026-09-17T09:51:41.704Z"
+      },
+      {
+        "_id": "attr-attr-visakhapatnam-royal-palace-museum",
+        "__v": 0,
+        "budgetCategory": "mid",
+        "createdAt": "2026-09-17T09:51:41.704Z",
+        "description": "Explore Visakhapatnam Royal Palace Museum in Visakhapatnam, an iconic palace showcasing regional architecture and natural wonder.",
+        "destinationId": "dest-visakhapatnam-ap",
+        "entryFee": {
+          "adult": 100,
+          "child": 50,
+          "foreign": 600,
+          "currency": "INR"
+        },
+        "estimatedDurationMins": 120,
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_attr-visakhapatnam-royal-palace-museum.jpg",
+            "publicId": "placeholder_attr-visakhapatnam-royal-palace-museum",
+            "altText": "Visakhapatnam Royal Palace Museum view",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            79.69,
+            15.1
+          ]
+        },
+        "name": "Visakhapatnam Royal Palace Museum",
+        "nearbyAttractionIds": [],
+        "openingHours": "09:00 AM - 06:00 PM",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "attr-visakhapatnam-royal-palace-museum",
+        "stateId": "state-ap",
+        "tags": [
+          "palace",
+          "mid",
+          "sightseeing",
+          "heritage"
+        ],
+        "type": "palace",
+        "updatedAt": "2026-09-17T09:51:41.704Z"
+      }
+    ]
+  },
+  "destination_seasons": {
+    "count": 432,
+    "sample": [
+      {
+        "_id": "season-dest-visakhapatnam-ap",
+        "__v": 0,
+        "bestFor": [
+          "Sightseeing",
+          "Outdoor Photography",
+          "Cultural Festivals",
+          "Nature Walks"
+        ],
+        "createdAt": "2026-09-17T09:51:48.444Z",
+        "destinationId": "dest-visakhapatnam-ap",
+        "monsoonMonths": [
+          7,
+          8,
+          9
+        ],
+        "offSeason": [
+          5,
+          6,
+          7
+        ],
+        "peakSeason": [
+          {
+            "month": 10,
+            "rating": 5,
+            "weather": "Clear & Crisp",
+            "crowdLevel": "high",
+            "priceMultiplier": 1.25
+          },
+          {
+            "month": 11,
+            "rating": 5,
+            "weather": "Pleasant Autumn",
+            "crowdLevel": "very_high",
+            "priceMultiplier": 1.4
+          },
+          {
+            "month": 12,
+            "rating": 5,
+            "weather": "Chilly Festive",
+            "crowdLevel": "very_high",
+            "priceMultiplier": 1.5
+          },
+          {
+            "month": 1,
+            "rating": 4,
+            "weather": "Winter Cool",
+            "crowdLevel": "high",
+            "priceMultiplier": 1.3
+          },
+          {
+            "month": 2,
+            "rating": 4,
+            "weather": "Mild Spring",
+            "crowdLevel": "moderate",
+            "priceMultiplier": 1.1
+          }
+        ],
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "snowMonths": [],
+        "stateId": "state-ap",
+        "updatedAt": "2026-09-17T09:51:48.444Z"
+      },
+      {
+        "_id": "season-dest-vijayawada-ap",
+        "__v": 0,
+        "bestFor": [
+          "Sightseeing",
+          "Outdoor Photography",
+          "Cultural Festivals",
+          "Nature Walks"
+        ],
+        "createdAt": "2026-09-17T09:51:48.444Z",
+        "destinationId": "dest-vijayawada-ap",
+        "monsoonMonths": [
+          7,
+          8,
+          9
+        ],
+        "offSeason": [
+          5,
+          6,
+          7
+        ],
+        "peakSeason": [
+          {
+            "month": 10,
+            "rating": 5,
+            "weather": "Clear & Crisp",
+            "crowdLevel": "high",
+            "priceMultiplier": 1.25
+          },
+          {
+            "month": 11,
+            "rating": 5,
+            "weather": "Pleasant Autumn",
+            "crowdLevel": "very_high",
+            "priceMultiplier": 1.4
+          },
+          {
+            "month": 12,
+            "rating": 5,
+            "weather": "Chilly Festive",
+            "crowdLevel": "very_high",
+            "priceMultiplier": 1.5
+          },
+          {
+            "month": 1,
+            "rating": 4,
+            "weather": "Winter Cool",
+            "crowdLevel": "high",
+            "priceMultiplier": 1.3
+          },
+          {
+            "month": 2,
+            "rating": 4,
+            "weather": "Mild Spring",
+            "crowdLevel": "moderate",
+            "priceMultiplier": 1.1
+          }
+        ],
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "snowMonths": [],
+        "stateId": "state-ap",
+        "updatedAt": "2026-09-17T09:51:48.444Z"
+      }
+    ]
+  },
+  "destination_safety": {
+    "count": 432,
+    "sample": [
+      {
+        "_id": "safety-dest-visakhapatnam-ap",
+        "__v": 0,
+        "advisories": [
+          "Keep emergency helpline numbers saved in your mobile phone",
+          "Verify trekking guide credentials before remote trail excursions",
+          "Carry bottled drinking water during high summer afternoon hours"
+        ],
+        "createdAt": "2026-09-17T09:51:48.871Z",
+        "destinationId": "dest-visakhapatnam-ap",
+        "emergencyContacts": [
+          {
+            "type": "police",
+            "number": "112",
+            "available24h": true,
+            "_id": "6aabb834a66bca85bb118ee1"
+          },
+          {
+            "type": "tourist_helpline",
+            "number": "1363",
+            "available24h": true,
+            "_id": "6aabb834a66bca85bb118ee2"
+          },
+          {
+            "type": "ambulance",
+            "number": "108",
+            "available24h": true,
+            "_id": "6aabb834a66bca85bb118ee3"
+          },
+          {
+            "type": "fire",
+            "number": "101",
+            "available24h": true,
+            "_id": "6aabb834a66bca85bb118ee4"
+          }
+        ],
+        "lastUpdated": "2026-01-15T00:00:00.000Z",
+        "overallRating": 4.5,
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "safetyNotes": [
+          "Active 24/7 tourist assistance police booths at major attractions",
+          "Hospitality staff and local cab aggregators are background-verified",
+          "Well-marked emergency exit points and pedestrian corridors"
+        ],
+        "stateId": "state-ap",
+        "updatedAt": "2026-09-17T09:51:48.871Z"
+      },
+      {
+        "_id": "safety-dest-vijayawada-ap",
+        "__v": 0,
+        "advisories": [
+          "Keep emergency helpline numbers saved in your mobile phone",
+          "Verify trekking guide credentials before remote trail excursions",
+          "Carry bottled drinking water during high summer afternoon hours"
+        ],
+        "createdAt": "2026-09-17T09:51:48.871Z",
+        "destinationId": "dest-vijayawada-ap",
+        "emergencyContacts": [
+          {
+            "type": "police",
+            "number": "112",
+            "available24h": true,
+            "_id": "6aabb834a66bca85bb118ee5"
+          },
+          {
+            "type": "tourist_helpline",
+            "number": "1363",
+            "available24h": true,
+            "_id": "6aabb834a66bca85bb118ee6"
+          },
+          {
+            "type": "ambulance",
+            "number": "108",
+            "available24h": true,
+            "_id": "6aabb834a66bca85bb118ee7"
+          },
+          {
+            "type": "fire",
+            "number": "101",
+            "available24h": true,
+            "_id": "6aabb834a66bca85bb118ee8"
+          }
+        ],
+        "lastUpdated": "2026-01-15T00:00:00.000Z",
+        "overallRating": 4,
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "safetyNotes": [
+          "Active 24/7 tourist assistance police booths at major attractions",
+          "Hospitality staff and local cab aggregators are background-verified",
+          "Well-marked emergency exit points and pedestrian corridors"
+        ],
+        "stateId": "state-ap",
+        "updatedAt": "2026-09-17T09:51:48.871Z"
+      }
+    ]
+  },
+  "flights": {
+    "count": 520,
+    "sample": [
+      {
+        "_id": "flt-ai-100",
+        "__v": 0,
+        "aircraft": "Airbus A320neo",
+        "airline": "Air India",
+        "arrivalTime": "10:20",
+        "availability": 36,
+        "class": [
+          "economy",
+          "business"
+        ],
+        "createdAt": "2026-09-17T09:51:45.713Z",
+        "currency": "INR",
+        "departureTime": "06:15",
+        "destinationAirportId": "airp-bom",
+        "durationMins": 67,
+        "fare": {
+          "economy": 3017,
+          "business": 9051,
+          "first": 15085
+        },
+        "flightNumber": "AI-100",
+        "originAirportId": "airp-del",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "serviceFees": 200,
+        "status": "scheduled",
+        "stops": 0,
+        "taxes": 650,
+        "updatedAt": "2026-09-17T09:51:45.713Z"
+      },
+      {
+        "_id": "flt-vi-101",
+        "__v": 0,
+        "aircraft": "Airbus A320neo",
+        "airline": "Vistara",
+        "arrivalTime": "10:40",
+        "availability": 37,
+        "class": [
+          "economy",
+          "business"
+        ],
+        "createdAt": "2026-09-17T09:51:45.713Z",
+        "currency": "INR",
+        "departureTime": "06:30",
+        "destinationAirportId": "airp-blr",
+        "durationMins": 74,
+        "fare": {
+          "economy": 3034,
+          "business": 9102,
+          "first": 15170
+        },
+        "flightNumber": "VI-101",
+        "originAirportId": "airp-del",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "serviceFees": 200,
+        "status": "scheduled",
+        "stops": 0,
+        "taxes": 650,
+        "updatedAt": "2026-09-17T09:51:45.713Z"
+      }
+    ]
+  },
+  "itinerary_templates": {
+    "count": 216,
+    "sample": [
+      {
+        "_id": "itin-itin-3-day-pilgrimage-odyssey-in-visakhapatnam-andhra-pradesh",
+        "__v": 0,
+        "budgetCategory": "budget",
+        "createdAt": "2026-09-17T09:51:47.315Z",
+        "currency": "INR",
+        "days": [
+          {
+            "dayNumber": 1,
+            "title": "Day 1: Highlights and Exploration of Visakhapatnam",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "activityType": "sightseeing",
+                "name": "Morning Landmark Discovery in Visakhapatnam",
+                "description": "Guided walk through the storied architecture and vibrant squares of Visakhapatnam.",
+                "estimatedCost": 200,
+                "durationMins": 120
+              },
+              {
+                "time": "01:00 PM",
+                "activityType": "food",
+                "name": "Traditional Culinary Immersion",
+                "description": "Savor regional dishes crafted with time-tested recipes and local spices.",
+                "estimatedCost": 400,
+                "durationMins": 60
+              },
+              {
+                "time": "03:30 PM",
+                "activityType": "cultural",
+                "name": "Afternoon Cultural & Arts Experience",
+                "description": "Interact with local artisans and explore handcrafts or museum galleries.",
+                "estimatedCost": 300,
+                "durationMins": 90
+              },
+              {
+                "time": "06:30 PM",
+                "activityType": "relaxation",
+                "name": "Sunset Vistas & Evening Promenade",
+                "description": "Unwind with sweeping skyline views and ambient evening performances.",
+                "estimatedCost": 0,
+                "durationMins": 60
+              }
+            ]
+          },
+          {
+            "dayNumber": 2,
+            "title": "Day 2: Highlights and Exploration of Vijayawada",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "activityType": "sightseeing",
+                "name": "Morning Landmark Discovery in Vijayawada",
+                "description": "Guided walk through the storied architecture and vibrant squares of Vijayawada.",
+                "estimatedCost": 200,
+                "durationMins": 120
+              },
+              {
+                "time": "01:00 PM",
+                "activityType": "food",
+                "name": "Traditional Culinary Immersion",
+                "description": "Savor regional dishes crafted with time-tested recipes and local spices.",
+                "estimatedCost": 400,
+                "durationMins": 60
+              },
+              {
+                "time": "03:30 PM",
+                "activityType": "cultural",
+                "name": "Afternoon Cultural & Arts Experience",
+                "description": "Interact with local artisans and explore handcrafts or museum galleries.",
+                "estimatedCost": 300,
+                "durationMins": 90
+              },
+              {
+                "time": "06:30 PM",
+                "activityType": "relaxation",
+                "name": "Sunset Vistas & Evening Promenade",
+                "description": "Unwind with sweeping skyline views and ambient evening performances.",
+                "estimatedCost": 0,
+                "durationMins": 60
+              }
+            ]
+          },
+          {
+            "dayNumber": 3,
+            "title": "Day 3: Highlights and Exploration of Visakhapatnam",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "activityType": "sightseeing",
+                "name": "Morning Landmark Discovery in Visakhapatnam",
+                "description": "Guided walk through the storied architecture and vibrant squares of Visakhapatnam.",
+                "estimatedCost": 200,
+                "durationMins": 120
+              },
+              {
+                "time": "01:00 PM",
+                "activityType": "food",
+                "name": "Traditional Culinary Immersion",
+                "description": "Savor regional dishes crafted with time-tested recipes and local spices.",
+                "estimatedCost": 400,
+                "durationMins": 60
+              },
+              {
+                "time": "03:30 PM",
+                "activityType": "cultural",
+                "name": "Afternoon Cultural & Arts Experience",
+                "description": "Interact with local artisans and explore handcrafts or museum galleries.",
+                "estimatedCost": 300,
+                "durationMins": 90
+              },
+              {
+                "time": "06:30 PM",
+                "activityType": "relaxation",
+                "name": "Sunset Vistas & Evening Promenade",
+                "description": "Unwind with sweeping skyline views and ambient evening performances.",
+                "estimatedCost": 0,
+                "durationMins": 60
+              }
+            ]
+          }
+        ],
+        "destinationIds": [
+          "dest-visakhapatnam-ap",
+          "dest-vijayawada-ap"
+        ],
+        "difficulty": "easy",
+        "durationDays": 3,
+        "estimatedActivityCost": 2400,
+        "estimatedDailyBudget": 2200,
+        "estimatedFoodCost": 3000,
+        "estimatedTotalCost": {
+          "min": 6600,
+          "max": 9900
+        },
+        "estimatedTransportCost": 4500,
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_itin_itin-3-day-pilgrimage-odyssey-in-visakhapatnam-andhra-pradesh.jpg",
+            "publicId": "placeholder_itin_itin-3-day-pilgrimage-odyssey-in-visakhapatnam-andhra-pradesh",
+            "altText": "3-Day PILGRIMAGE Odyssey in Visakhapatnam, Andhra Pradesh preview banner",
+            "type": "hero"
+          }
+        ],
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "itin-3-day-pilgrimage-odyssey-in-visakhapatnam-andhra-pradesh",
+        "stateIds": [
+          "state-ap"
+        ],
+        "tags": [
+          "pilgrimage",
+          "budget",
+          "3-days",
+          "andhra pradesh"
+        ],
+        "theme": "pilgrimage",
+        "title": "3-Day PILGRIMAGE Odyssey in Visakhapatnam, Andhra Pradesh",
+        "updatedAt": "2026-09-17T09:51:47.315Z"
+      },
+      {
+        "_id": "itin-itin-4-day-honeymoon-odyssey-in-vijayawada-andhra-pradesh",
+        "__v": 0,
+        "budgetCategory": "mid",
+        "createdAt": "2026-09-17T09:51:47.315Z",
+        "currency": "INR",
+        "days": [
+          {
+            "dayNumber": 1,
+            "title": "Day 1: Highlights and Exploration of Vijayawada",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "activityType": "sightseeing",
+                "name": "Morning Landmark Discovery in Vijayawada",
+                "description": "Guided walk through the storied architecture and vibrant squares of Vijayawada.",
+                "estimatedCost": 200,
+                "durationMins": 120
+              },
+              {
+                "time": "01:00 PM",
+                "activityType": "food",
+                "name": "Traditional Culinary Immersion",
+                "description": "Savor regional dishes crafted with time-tested recipes and local spices.",
+                "estimatedCost": 400,
+                "durationMins": 60
+              },
+              {
+                "time": "03:30 PM",
+                "activityType": "cultural",
+                "name": "Afternoon Cultural & Arts Experience",
+                "description": "Interact with local artisans and explore handcrafts or museum galleries.",
+                "estimatedCost": 300,
+                "durationMins": 90
+              },
+              {
+                "time": "06:30 PM",
+                "activityType": "relaxation",
+                "name": "Sunset Vistas & Evening Promenade",
+                "description": "Unwind with sweeping skyline views and ambient evening performances.",
+                "estimatedCost": 0,
+                "durationMins": 60
+              }
+            ]
+          },
+          {
+            "dayNumber": 2,
+            "title": "Day 2: Highlights and Exploration of Tirupati",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "activityType": "sightseeing",
+                "name": "Morning Landmark Discovery in Tirupati",
+                "description": "Guided walk through the storied architecture and vibrant squares of Tirupati.",
+                "estimatedCost": 200,
+                "durationMins": 120
+              },
+              {
+                "time": "01:00 PM",
+                "activityType": "food",
+                "name": "Traditional Culinary Immersion",
+                "description": "Savor regional dishes crafted with time-tested recipes and local spices.",
+                "estimatedCost": 400,
+                "durationMins": 60
+              },
+              {
+                "time": "03:30 PM",
+                "activityType": "cultural",
+                "name": "Afternoon Cultural & Arts Experience",
+                "description": "Interact with local artisans and explore handcrafts or museum galleries.",
+                "estimatedCost": 300,
+                "durationMins": 90
+              },
+              {
+                "time": "06:30 PM",
+                "activityType": "relaxation",
+                "name": "Sunset Vistas & Evening Promenade",
+                "description": "Unwind with sweeping skyline views and ambient evening performances.",
+                "estimatedCost": 0,
+                "durationMins": 60
+              }
+            ]
+          },
+          {
+            "dayNumber": 3,
+            "title": "Day 3: Highlights and Exploration of Vijayawada",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "activityType": "sightseeing",
+                "name": "Morning Landmark Discovery in Vijayawada",
+                "description": "Guided walk through the storied architecture and vibrant squares of Vijayawada.",
+                "estimatedCost": 200,
+                "durationMins": 120
+              },
+              {
+                "time": "01:00 PM",
+                "activityType": "food",
+                "name": "Traditional Culinary Immersion",
+                "description": "Savor regional dishes crafted with time-tested recipes and local spices.",
+                "estimatedCost": 400,
+                "durationMins": 60
+              },
+              {
+                "time": "03:30 PM",
+                "activityType": "cultural",
+                "name": "Afternoon Cultural & Arts Experience",
+                "description": "Interact with local artisans and explore handcrafts or museum galleries.",
+                "estimatedCost": 300,
+                "durationMins": 90
+              },
+              {
+                "time": "06:30 PM",
+                "activityType": "relaxation",
+                "name": "Sunset Vistas & Evening Promenade",
+                "description": "Unwind with sweeping skyline views and ambient evening performances.",
+                "estimatedCost": 0,
+                "durationMins": 60
+              }
+            ]
+          },
+          {
+            "dayNumber": 4,
+            "title": "Day 4: Highlights and Exploration of Tirupati",
+            "activities": [
+              {
+                "time": "09:00 AM",
+                "activityType": "sightseeing",
+                "name": "Morning Landmark Discovery in Tirupati",
+                "description": "Guided walk through the storied architecture and vibrant squares of Tirupati.",
+                "estimatedCost": 200,
+                "durationMins": 120
+              },
+              {
+                "time": "01:00 PM",
+                "activityType": "food",
+                "name": "Traditional Culinary Immersion",
+                "description": "Savor regional dishes crafted with time-tested recipes and local spices.",
+                "estimatedCost": 400,
+                "durationMins": 60
+              },
+              {
+                "time": "03:30 PM",
+                "activityType": "cultural",
+                "name": "Afternoon Cultural & Arts Experience",
+                "description": "Interact with local artisans and explore handcrafts or museum galleries.",
+                "estimatedCost": 300,
+                "durationMins": 90
+              },
+              {
+                "time": "06:30 PM",
+                "activityType": "relaxation",
+                "name": "Sunset Vistas & Evening Promenade",
+                "description": "Unwind with sweeping skyline views and ambient evening performances.",
+                "estimatedCost": 0,
+                "durationMins": 60
+              }
+            ]
+          }
+        ],
+        "destinationIds": [
+          "dest-vijayawada-ap",
+          "dest-tirupati-ap"
+        ],
+        "difficulty": "moderate",
+        "durationDays": 4,
+        "estimatedActivityCost": 3200,
+        "estimatedDailyBudget": 4500,
+        "estimatedFoodCost": 4000,
+        "estimatedTotalCost": {
+          "min": 18000,
+          "max": 27000
+        },
+        "estimatedTransportCost": 6000,
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_itin_itin-4-day-honeymoon-odyssey-in-vijayawada-andhra-pradesh.jpg",
+            "publicId": "placeholder_itin_itin-4-day-honeymoon-odyssey-in-vijayawada-andhra-pradesh",
+            "altText": "4-Day HONEYMOON Odyssey in Vijayawada, Andhra Pradesh preview banner",
+            "type": "hero"
+          }
+        ],
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "slug": "itin-4-day-honeymoon-odyssey-in-vijayawada-andhra-pradesh",
+        "stateIds": [
+          "state-ap"
+        ],
+        "tags": [
+          "honeymoon",
+          "mid",
+          "4-days",
+          "andhra pradesh"
+        ],
+        "theme": "honeymoon",
+        "title": "4-Day HONEYMOON Odyssey in Vijayawada, Andhra Pradesh",
+        "updatedAt": "2026-09-17T09:51:47.315Z"
+      }
+    ]
+  },
+  "pilgrimage_sites": {
+    "count": 540,
+    "sample": [
+      {
+        "_id": "pilg-pilg-visakhapatnam-sri-maha-shiva-temple-1",
+        "__v": 0,
+        "classificationSource": "State Dept of Religious Endowments",
+        "classificationStatus": "state-recognized",
+        "createdAt": "2026-09-17T09:51:44.856Z",
+        "deity": "Lord Shiva",
+        "description": "Visakhapatnam Sri Maha Shiva Temple #1 is a revered sanctuary in Visakhapatnam, attracting devout pilgrims and architecture admirers from across the nation.",
+        "destinationId": "dest-visakhapatnam-ap",
+        "dressCode": "Modest attire covering shoulders and knees is recommended upon entry.",
+        "entryFee": {
+          "adult": 0,
+          "child": 0,
+          "foreign": 0,
+          "currency": "INR"
+        },
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_pilg-visakhapatnam-sri-maha-shiva-temple-1.jpg",
+            "publicId": "placeholder_pilg-visakhapatnam-sri-maha-shiva-temple-1",
+            "altText": "Visakhapatnam Sri Maha Shiva Temple #1 sanctum in Visakhapatnam",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            79.682,
+            15.082
+          ]
+        },
+        "name": "Visakhapatnam Sri Maha Shiva Temple #1",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "religion": "Hindu",
+        "significance": "Celebrated spiritual center embodying historic community devotion and architectural grandeur.",
+        "slug": "pilg-visakhapatnam-sri-maha-shiva-temple-1",
+        "stateId": "state-ap",
+        "type": "temple",
+        "updatedAt": "2026-09-17T09:51:44.856Z",
+        "visitorsPerYear": 50000
+      },
+      {
+        "_id": "pilg-pilg-vijayawada-vishnu-narayana-temple-1",
+        "__v": 0,
+        "classificationSource": "District Temple Trust",
+        "classificationStatus": "locally-recognized",
+        "createdAt": "2026-09-17T09:51:44.856Z",
+        "deity": "Lord Vishnu",
+        "description": "Vijayawada Vishnu Narayana Temple #1 is a revered sanctuary in Vijayawada, attracting devout pilgrims and architecture admirers from across the nation.",
+        "destinationId": "dest-vijayawada-ap",
+        "dressCode": "Modest attire covering shoulders and knees is recommended upon entry.",
+        "entryFee": {
+          "adult": 0,
+          "child": 0,
+          "foreign": 0,
+          "currency": "INR"
+        },
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_pilg-vijayawada-vishnu-narayana-temple-1.jpg",
+            "publicId": "placeholder_pilg-vijayawada-vishnu-narayana-temple-1",
+            "altText": "Vijayawada Vishnu Narayana Temple #1 sanctum in Vijayawada",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            81.069,
+            15.322
+          ]
+        },
+        "name": "Vijayawada Vishnu Narayana Temple #1",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "religion": "Hindu",
+        "significance": "Celebrated spiritual center embodying historic community devotion and architectural grandeur.",
+        "slug": "pilg-vijayawada-vishnu-narayana-temple-1",
+        "stateId": "state-ap",
+        "type": "temple",
+        "updatedAt": "2026-09-17T09:51:44.856Z",
+        "visitorsPerYear": 67000
+      }
+    ]
+  },
+  "airports": {
+    "count": 36,
+    "sample": [
+      {
+        "_id": "airp-del",
+        "__v": 0,
+        "city": "Delhi",
+        "createdAt": "2026-09-17T09:51:45.574Z",
+        "destinationId": "dest-old-delhi-heritage-quarter-dl",
+        "iataCode": "DEL",
+        "icaoCode": "VIDEL",
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_airp_del.jpg",
+            "publicId": "placeholder_airp_del",
+            "altText": "Indira Gandhi International Airport terminal",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1,
+            28.5562
+          ]
+        },
+        "name": "Indira Gandhi International Airport",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "runways": 2,
+        "stateId": "ut-dl",
+        "terminals": 3,
+        "type": "international",
+        "updatedAt": "2026-09-17T09:51:45.574Z"
+      },
+      {
+        "_id": "airp-bom",
+        "__v": 0,
+        "city": "Mumbai",
+        "createdAt": "2026-09-17T09:51:45.574Z",
+        "destinationId": "dest-mumbai-mh",
+        "iataCode": "BOM",
+        "icaoCode": "VIBOM",
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_airp_bom.jpg",
+            "publicId": "placeholder_airp_bom",
+            "altText": "Chhatrapati Shivaji Maharaj International Airport terminal",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            72.8679,
+            19.0896
+          ]
+        },
+        "name": "Chhatrapati Shivaji Maharaj International Airport",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "runways": 2,
+        "stateId": "state-mh",
+        "terminals": 3,
+        "type": "international",
+        "updatedAt": "2026-09-17T09:51:45.574Z"
+      }
+    ]
+  },
+  "states": {
+    "count": 36,
+    "sample": [
+      {
+        "_id": "state-ap",
+        "__v": 0,
+        "capital": "Amaravati",
+        "code": "AP",
+        "createdAt": "2026-09-17T09:51:40.684Z",
+        "currency": "INR",
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_state-ap.jpg",
+            "publicId": "placeholder_state-ap",
+            "altText": "Andhra Pradesh landscape",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "languages": [
+          "Telugu",
+          "Urdu"
+        ],
+        "name": "Andhra Pradesh",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie-Seed",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "region": "South",
+        "timezone": "Asia/Kolkata",
+        "type": "STATE",
+        "updatedAt": "2026-09-17T09:51:40.684Z"
+      },
+      {
+        "_id": "state-ar",
+        "__v": 0,
+        "capital": "Itanagar",
+        "code": "AR",
+        "createdAt": "2026-09-17T09:51:40.684Z",
+        "currency": "INR",
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_state-ar.jpg",
+            "publicId": "placeholder_state-ar",
+            "altText": "Arunachal Pradesh landscape",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "languages": [
+          "English",
+          "Nyishi",
+          "Bengali"
+        ],
+        "name": "Arunachal Pradesh",
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie-Seed",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "region": "Northeast",
+        "timezone": "Asia/Kolkata",
+        "type": "STATE",
+        "updatedAt": "2026-09-17T09:51:40.684Z"
+      }
+    ]
+  },
+  "railway_stations": {
+    "count": 28,
+    "sample": [
+      {
+        "_id": "stn-ndls",
+        "__v": 0,
+        "city": "Delhi",
+        "createdAt": "2026-09-17T09:51:45.614Z",
+        "destinationId": "dest-old-delhi-heritage-quarter-dl",
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_stn_ndls.jpg",
+            "publicId": "placeholder_stn_ndls",
+            "altText": "New Delhi Railway Station building",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.2217,
+            28.643
+          ]
+        },
+        "name": "New Delhi Railway Station",
+        "platforms": 6,
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "stateId": "ut-dl",
+        "stationCode": "NDLS",
+        "type": "major",
+        "updatedAt": "2026-09-17T09:51:45.614Z",
+        "zone": "Indian Railways"
+      },
+      {
+        "_id": "stn-csmt",
+        "__v": 0,
+        "city": "Mumbai",
+        "createdAt": "2026-09-17T09:51:45.614Z",
+        "destinationId": "dest-mumbai-mh",
+        "images": [
+          {
+            "url": "https://res.cloudinary.com/soootttd/image/upload/v1/placeholder_stn_csmt.jpg",
+            "publicId": "placeholder_stn_csmt",
+            "altText": "Chhatrapati Shivaji Maharaj Terminus building",
+            "type": "hero"
+          }
+        ],
+        "isActive": true,
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            72.8358,
+            18.9402
+          ]
+        },
+        "name": "Chhatrapati Shivaji Maharaj Terminus",
+        "platforms": 6,
+        "provenance": {
+          "sourceType": "SIMULATED",
+          "sourceName": "TravelGenie Synthetic Generator",
+          "dataVersion": "1.0.0",
+          "lastVerifiedAt": "2026-01-01T00:00:00.000Z"
+        },
+        "stateId": "state-mh",
+        "stationCode": "CSMT",
+        "type": "major",
+        "updatedAt": "2026-09-17T09:51:45.614Z",
+        "zone": "Indian Railways"
+      }
+    ]
+  }
+}

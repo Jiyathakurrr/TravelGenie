@@ -1,0 +1,6 @@
+{
+  "name": "TravelGenie",
+  "description": "Pan-India AI-powered travel planner and itinerary companion with verified destinations, accommodations, and Cloudinary media.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
