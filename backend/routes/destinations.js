@@ -25,6 +25,62 @@ function getDb() {
 }
 
 /**
+ * GET /api/destinations/debug
+ * Diagnostic endpoint — lists all collection names and document counts.
+ * Helps verify which database Mongoose is connected to and whether
+ * destination_catalog has any documents.
+ */
+router.get("/debug", async (req, res) => {
+  try {
+    const db = getDb();
+    const dbName = db.databaseName;
+
+    // List all collections
+    const collections = await db.listCollections().toArray();
+    const collectionNames = collections.map((c) => c.name);
+
+    // Count documents in destination_catalog (no filter)
+    let totalCount = 0;
+    let activeCount = 0;
+    let sampleDoc = null;
+    let statesCount = 0;
+
+    if (collectionNames.includes("destination_catalog")) {
+      totalCount = await db.collection("destination_catalog").countDocuments({});
+      activeCount = await db.collection("destination_catalog").countDocuments({ isActive: { $ne: false } });
+      sampleDoc = await db.collection("destination_catalog").findOne({});
+    }
+    if (collectionNames.includes("states")) {
+      statesCount = await db.collection("states").countDocuments({});
+    }
+
+    res.json({
+      connectedDatabase: dbName,
+      collections: collectionNames,
+      destination_catalog: {
+        totalDocuments: totalCount,
+        documentsPassingIsActiveFilter: activeCount,
+        sampleDocument: sampleDoc ? {
+          _id: sampleDoc._id,
+          name: sampleDoc.name,
+          stateId: sampleDoc.stateId,
+          isActive: sampleDoc.isActive,
+          type: sampleDoc.type,
+          slug: sampleDoc.slug,
+          hasImages: Array.isArray(sampleDoc.images) && sampleDoc.images.length > 0,
+        } : null,
+      },
+      states: {
+        totalDocuments: statesCount,
+      },
+    });
+  } catch (err) {
+    console.error("Debug error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * GET /api/destinations
  * Query params:
  *   type   — filter by destination type (city, beach, heritage, etc.)
@@ -36,7 +92,8 @@ router.get("/", async (req, res) => {
     const db = getDb();
     const { type, search, limit = "60" } = req.query;
 
-    const query = { isActive: { $ne: false } };
+    // Build query — omit isActive filter to include all documents regardless of field presence
+    const query = {};
     if (type && type !== "all") {
       query.type = type;
     }
@@ -77,6 +134,11 @@ router.get("/:id", async (req, res) => {
   try {
     const db = getDb();
     const idOrSlug = req.params.id;
+
+    // Skip "debug" handled above — shouldn't reach here but guard anyway
+    if (idOrSlug === "debug") {
+      return res.status(404).json({ error: "Use /api/destinations/debug" });
+    }
 
     const destination = await db.collection("destination_catalog").findOne({
       $or: [
