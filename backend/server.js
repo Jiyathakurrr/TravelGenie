@@ -12,6 +12,7 @@ const chatRoutes = require("./routes/chat");
 const tripsRoutes = require("./routes/trips");
 const uploadRoutes = require("./routes/upload");
 const paymentRoutes = require("./routes/payment");
+const destinationsRoutes = require("./routes/destinations");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -63,6 +64,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/trips", tripsRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/destinations", destinationsRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
