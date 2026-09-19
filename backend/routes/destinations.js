@@ -1,17 +1,28 @@
 /**
  * routes/destinations.js
  * Serves destination data from the `destination_catalog` MongoDB collection.
- * Mirrors the logic in frontend/server.ts for /api/destinations.
+ *
+ * Uses mongoose.connection.db (raw native driver) instead of importing
+ * cross-directory model files (database/models/) that don't have access
+ * to backend/node_modules/mongoose.
+ *
+ * Mirrors the query logic in frontend/server.ts lines 62-153.
  */
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 
-// Lazy-load models from the shared database/models directory
-// (backend already has mongoose connected via config/db.js)
-const path = require("path");
-const DestinationCatalog = require(path.resolve(__dirname, "../../database/models/DestinationCatalog.js"));
-const State = require(path.resolve(__dirname, "../../database/models/State.js"));
+/**
+ * Helper — returns the native MongoDB db handle from the existing Mongoose connection.
+ * Throws if Mongoose has not yet connected (readyState !== 1).
+ */
+function getDb() {
+  const conn = mongoose.connection;
+  if (!conn || conn.readyState !== 1) {
+    throw new Error("MongoDB not connected yet");
+  }
+  return conn.db;
+}
 
 /**
  * GET /api/destinations
@@ -22,6 +33,7 @@ const State = require(path.resolve(__dirname, "../../database/models/State.js"))
  */
 router.get("/", async (req, res) => {
   try {
+    const db = getDb();
     const { type, search, limit = "60" } = req.query;
 
     const query = { isActive: { $ne: false } };
@@ -34,10 +46,14 @@ router.get("/", async (req, res) => {
 
     const limitNum = Math.min(parseInt(limit) || 60, 200);
 
-    const destinations = await DestinationCatalog.find(query).limit(limitNum).lean();
+    const destinations = await db
+      .collection("destination_catalog")
+      .find(query)
+      .limit(limitNum)
+      .toArray();
 
     // Enrich with state names
-    const states = await State.find().lean();
+    const states = await db.collection("states").find({}).toArray();
     const stateMap = new Map(states.map((s) => [s._id, s.name]));
 
     const enriched = destinations.map((d) => ({
@@ -59,18 +75,16 @@ router.get("/", async (req, res) => {
  */
 router.get("/:id", async (req, res) => {
   try {
+    const db = getDb();
     const idOrSlug = req.params.id;
-    const conn = mongoose.connection;
-    const db = conn.db;
 
-    // Find by _id, slug, or name
-    const destination = await DestinationCatalog.findOne({
+    const destination = await db.collection("destination_catalog").findOne({
       $or: [
         { _id: idOrSlug },
         { slug: idOrSlug },
         { name: { $regex: new RegExp(`^${idOrSlug}$`, "i") } },
       ],
-    }).lean();
+    });
 
     if (!destination) {
       return res.status(404).json({ error: "Destination not found" });
@@ -89,7 +103,7 @@ router.get("/:id", async (req, res) => {
       airports,
       railwayStations,
     ] = await Promise.all([
-      State.findOne({ _id: destination.stateId }).lean(),
+      db.collection("states").findOne({ _id: destination.stateId }),
       db.collection("accommodations").find({ destinationId: destId }).limit(10).toArray().catch(() => []),
       db.collection("attractions").find({ destinationId: destId }).limit(10).toArray().catch(() => []),
       db.collection("pilgrimage_sites").find({ destinationId: destId }).limit(6).toArray().catch(() => []),
