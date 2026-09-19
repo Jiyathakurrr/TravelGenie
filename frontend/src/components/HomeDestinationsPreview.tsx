@@ -3,6 +3,7 @@ import { ArrowRight, RefreshCw } from 'lucide-react';
 import { Destination } from '../types';
 import { DestinationCard } from './DestinationCard';
 import { DestinationDetailModal } from './DestinationDetailModal';
+import { getApiUrl } from '../utils/api';
 
 interface HomeDestinationsPreviewProps {
   onViewAll: () => void;
@@ -29,7 +30,7 @@ export const HomeDestinationsPreview: React.FC<HomeDestinationsPreviewProps> = (
 
   useEffect(() => {
     setLoading(true);
-    const url = `/api/destinations?limit=6${selectedType !== 'all' ? `&type=${selectedType}` : ''}`;
+    const url = getApiUrl(`/api/destinations?limit=6${selectedType !== 'all' ? `&type=${selectedType}` : ''}`);
     fetch(url)
       .then((res) => res.json())
       .then((data) => {

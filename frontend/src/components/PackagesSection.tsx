@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, Wallet, Check, Sparkles, Calendar, ChevronRight } from 'lucide-react';
 import { TravelPackage, ItineraryTemplate } from '../types';
 import { CloudinaryImage } from './CloudinaryImage';
+import { getApiUrl } from '../utils/api';
 
 interface PackagesSectionProps {
   onPlanTrip: (destinationOrTheme: string) => void;
@@ -15,8 +16,8 @@ export const PackagesSection: React.FC<PackagesSectionProps> = ({ onPlanTrip }) 
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/packages').then((res) => res.json()),
-      fetch('/api/itineraries').then((res) => res.json()),
+      fetch(getApiUrl('/api/packages')).then((res) => res.json()),
+      fetch(getApiUrl('/api/itineraries')).then((res) => res.json()),
     ])
       .then(([pkgData, itinData]) => {
         if (Array.isArray(pkgData)) setPackages(pkgData);

@@ -3,6 +3,7 @@ import { Search, SlidersHorizontal, RefreshCw, Compass } from 'lucide-react';
 import { Destination } from '../types';
 import { DestinationCard } from './DestinationCard';
 import { DestinationDetailModal } from './DestinationDetailModal';
+import { getApiUrl } from '../utils/api';
 
 interface DestinationsPageProps {
   onPlanTrip: (destinationName: string) => void;
@@ -28,9 +29,9 @@ export const DestinationsPage: React.FC<DestinationsPageProps> = ({ onPlanTrip }
 
   const fetchDestinations = () => {
     setLoading(true);
-    const url = `/api/destinations?limit=80${selectedType !== 'all' ? `&type=${selectedType}` : ''}${
+    const url = getApiUrl(`/api/destinations?limit=80${selectedType !== 'all' ? `&type=${selectedType}` : ''}${
       searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''
-    }`;
+    }`);
 
     fetch(url)
       .then((res) => res.json())

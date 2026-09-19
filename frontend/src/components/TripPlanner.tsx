@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getApiUrl } from '../utils/api';
 import {
   Send,
   Bot,
@@ -150,7 +151,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
 
   // Fetch real transport samples from database
   useEffect(() => {
-    fetch('/api/transport')
+    fetch(getApiUrl('/api/transport'))
       .then((res) => res.json())
       .then((data) => setTransportData(data))
       .catch(() => {});
@@ -170,7 +171,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
       if (token) headers['Authorization'] = `Bearer ${token}`;
       if (userEmail) headers['x-user-email'] = userEmail;
 
-      const res = await fetch('/api/chat/history', { headers });
+      const res = await fetch(getApiUrl('/api/chat/history'), { headers });
       const data = await res.json();
       if (data.conversations && Array.isArray(data.conversations)) {
         setConversations(data.conversations);
@@ -198,7 +199,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('/api/bookings', { headers });
+      const res = await fetch(getApiUrl('/api/bookings'), { headers });
       const data = await res.json();
       if (data.bookings) {
         setUserBookings(data.bookings);
@@ -264,7 +265,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('/api/chat', {
+      const res = await fetch(getApiUrl('/api/chat'), {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -385,7 +386,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
       // 2. Create real order on backend
-      const orderRes = await fetch('/api/payment/create-order', {
+      const orderRes = await fetch(getApiUrl('/api/payment/create-order'), {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -454,7 +455,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
         setPaymentStatus({ state: 'failed', error: errorMsg });
 
         // Record failure on backend
-        fetch('/api/payment/failed', {
+        fetch(getApiUrl('/api/payment/failed'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -484,7 +485,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const verifyRes = await fetch('/api/payment/verify', {
+      const verifyRes = await fetch(getApiUrl('/api/payment/verify'), {
         method: 'POST',
         headers,
         body: JSON.stringify({

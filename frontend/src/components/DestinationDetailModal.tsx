@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, MapPin, Calendar, Wallet, ShieldAlert, ShieldCheck, Hotel, Sparkles, Navigation, Phone, ArrowRight } from 'lucide-react';
 import { Destination } from '../types';
 import { CloudinaryImage } from './CloudinaryImage';
+import { getApiUrl } from '../utils/api';
 
 interface DestinationDetailModalProps {
   destination: Destination | null;
@@ -24,7 +25,7 @@ export const DestinationDetailModal: React.FC<DestinationDetailModalProps> = ({
       return;
     }
     setLoading(true);
-    fetch(`/api/destinations/${destination._id}`)
+    fetch(getApiUrl(`/api/destinations/${destination._id}`))
       .then(res => res.json())
       .then(data => {
         setDetails(data);
