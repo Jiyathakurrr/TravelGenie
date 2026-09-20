@@ -13,16 +13,10 @@ function getGeminiApiKey() {
   ).trim();
 }
 
-const GEMINI_MODELS = [
-  process.env.GEMINI_MODEL,
-  "gemini-2.5-flash",
-  "gemini-2.0-flash",
-  "gemini-2.5-pro",
-  "gemini-2.0-flash-lite",
-].filter(Boolean);
+const GEMINI_MODEL = "gemini-3.6-flash";
 
 /**
- * Calls the Google Gemini REST API using native fetch with model fallback.
+ * Calls the Google Gemini REST API using native fetch with gemini-3.6-flash.
  * @param {string} systemPrompt System instruction for the assistant
  * @param {Array<{role: string, content: string}>} messages Conversation messages
  * @returns {Promise<{text: string|null, model: string|null, error: string|null}>}
@@ -59,64 +53,67 @@ async function callGeminiAI(systemPrompt, messages) {
     });
   }
 
-  let lastError = null;
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
-  for (const model of GEMINI_MODELS) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const payload = {
+      contents,
+      systemInstruction: systemPrompt
+        ? {
+            parts: [{ text: systemPrompt }],
+          }
+        : undefined,
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 2000,
+      },
+    };
 
-      const payload = {
-        contents,
-        systemInstruction: systemPrompt
-          ? {
-              parts: [{ text: systemPrompt }],
-            }
-          : undefined,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2000,
-        },
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const errorMsg = data?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+      console.warn(`[Gemini] Model ${GEMINI_MODEL} returned error: ${errorMsg}`);
+      return {
+        text: null,
+        model: GEMINI_MODEL,
+        error: errorMsg,
       };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorMsg = data?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
-        console.warn(`[Gemini] Model ${model} returned error: ${errorMsg}`);
-        lastError = errorMsg;
-        continue;
-      }
-
-      const candidate = data?.candidates?.[0];
-      const replyText = candidate?.content?.parts?.map((p) => p.text).join("") || null;
-
-      if (replyText) {
-        return { text: replyText, model, error: null };
-      }
-    } catch (err) {
-      const errMsg = err instanceof Error ? err.message : String(err);
-      console.warn(`[Gemini] Call to model ${model} failed: ${errMsg}`);
-      lastError = errMsg;
     }
-  }
 
-  return {
-    text: null,
-    model: null,
-    error: lastError || "Failed to generate content with Gemini API.",
-  };
+    const candidate = data?.candidates?.[0];
+    const replyText = candidate?.content?.parts?.map((p) => p.text).join("") || null;
+
+    if (replyText) {
+      return { text: replyText, model: GEMINI_MODEL, error: null };
+    }
+
+    return {
+      text: null,
+      model: GEMINI_MODEL,
+      error: "Empty response returned by Gemini model.",
+    };
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.error(`[Gemini] Call to model ${GEMINI_MODEL} failed: ${errMsg}`);
+    return {
+      text: null,
+      model: GEMINI_MODEL,
+      error: errMsg,
+    };
+  }
 }
 
 module.exports = {
   getGeminiApiKey,
-  GEMINI_MODELS,
+  GEMINI_MODEL,
   callGeminiAI,
 };
