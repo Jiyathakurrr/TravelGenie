@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getApiUrl } from '../utils/api';
+import { downloadItineraryPdf, extractTripMetadata } from '../utils/pdfGenerator';
 import {
   Send,
   Bot,
@@ -24,6 +25,7 @@ import {
   X,
   Receipt,
   Lock,
+  Download,
 } from 'lucide-react';
 
 interface Message {
@@ -229,7 +231,7 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
         id: 'init-1',
         role: 'assistant',
         content:
-          "Namaste! ✈️ I'm Travel Genie — your pan-India AI travel companion.\n\nTell me your next destination! What dates, party size, and estimated budget do you have in mind?",
+          "Namaste! ✈️ I'm Travel Genie — your pan-India AI travel companion.\n\nTell me your destination, travel dates (start & end), trip duration, number of travelers, and estimated budget so I can craft your verified day-by-day itinerary!",
         createdAt: new Date(),
       },
     ]);
@@ -329,18 +331,33 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
   // Determine whether an itinerary has been discussed/generated
   const hasItineraryOrPlan =
     messages.length >= 2 &&
-    messages.some(
-      (m) =>
-        m.role === 'assistant' &&
-        (m.content.toLowerCase().includes('day 1') ||
-          m.content.toLowerCase().includes('day-') ||
-          m.content.toLowerCase().includes('itinerary') ||
-          m.content.toLowerCase().includes('budget') ||
-          m.content.toLowerCase().includes('hotel') ||
-          m.content.toLowerCase().includes('recommend'))
-    );
+    messages.some((m) => m.role === 'assistant' && m.id !== 'init-1');
 
   const displayDestination = detectedDestination || initialDestination || 'Custom Indian Tour';
+
+  // Download generated itinerary as PDF
+  const handleDownloadPdf = (specificContent?: string) => {
+    const itineraryMsg =
+      specificContent ||
+      messages.filter((m) => m.role === 'assistant' && m.id !== 'init-1').pop()?.content ||
+      messages.filter((m) => m.role === 'assistant').pop()?.content ||
+      '';
+
+    if (!itineraryMsg) return;
+
+    const meta = extractTripMetadata(messages, displayDestination);
+
+    downloadItineraryPdf({
+      destination: meta.destination || displayDestination,
+      startDate: meta.startDate,
+      endDate: meta.endDate,
+      duration: meta.duration,
+      travelers: meta.travelers,
+      budget: meta.budget,
+      itineraryContent: itineraryMsg,
+      safetyInfo: `Night & local safety advisory for ${meta.destination || displayDestination}: Standard vigilance recommended. Tourist Helpline 1363 / Emergency 112.`,
+    });
+  };
 
   // Helper to ensure Razorpay checkout script is loaded
   const loadRazorpayScript = (): Promise<boolean> => {
@@ -685,6 +702,21 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
                 }`}
               >
                 {m.content}
+                {m.role === 'assistant' && m.id !== 'init-1' && m.id === [...messages].reverse().find(msg => msg.role === 'assistant')?.id && (
+                  <div className="mt-3 pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadPdf(m.content)}
+                      className="px-4 py-2 rounded-xl bg-[var(--color-accent)] hover:opacity-95 text-white text-xs font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+                    >
+                      <Download size={14} className="shrink-0" />
+                      <span>Download PDF</span>
+                    </button>
+                    <span className="text-[10px] sm:text-[11px] text-[var(--color-muted)] font-medium">
+                      TravelGenie Verified Plan · PDF
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -737,8 +769,16 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
                   </div>
                 </div>
 
-                {/* Payment Action Button */}
+                {/* Action Buttons: Download PDF & Proceed to Payment */}
                 <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                  <button
+                    onClick={() => handleDownloadPdf()}
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-white border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-amber-50 text-xs font-semibold flex items-center justify-center gap-2 shadow-2xs transition-all"
+                  >
+                    <Download size={14} />
+                    <span>Download PDF</span>
+                  </button>
+
                   <button
                     onClick={handleProceedToPayment}
                     disabled={isProcessingPayment}
@@ -958,14 +998,23 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ initialDestination = '
                 Complete your conversation, then click <strong>Proceed to Payment</strong> to lock in your custom itinerary using Razorpay sandbox credentials.
               </p>
               {hasItineraryOrPlan && (
-                <button
-                  onClick={handleProceedToPayment}
-                  disabled={isProcessingPayment}
-                  className="w-full mt-2 py-2 rounded-lg bg-[var(--color-accent)] text-white font-semibold text-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 shadow-2xs"
-                >
-                  <CreditCard size={14} />
-                  <span>Pay ₹1,499 Advance (Test Mode)</span>
-                </button>
+                <div className="space-y-2 mt-2">
+                  <button
+                    onClick={() => handleDownloadPdf()}
+                    className="w-full py-2 rounded-lg bg-white border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-amber-100 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                  >
+                    <Download size={14} />
+                    <span>Download Itinerary (PDF)</span>
+                  </button>
+                  <button
+                    onClick={handleProceedToPayment}
+                    disabled={isProcessingPayment}
+                    className="w-full py-2 rounded-lg bg-[var(--color-accent)] text-white font-semibold text-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 shadow-2xs"
+                  >
+                    <CreditCard size={14} />
+                    <span>Pay ₹1,499 Advance (Test Mode)</span>
+                  </button>
+                </div>
               )}
             </div>
           </>
