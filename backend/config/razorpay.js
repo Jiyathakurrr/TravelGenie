@@ -7,17 +7,21 @@ const Razorpay = require("razorpay");
 function getRazorpayCredentials() {
   const keyId = (
     process.env.RAZORPAY_KEY_ID ||
+    process.env.RAZORPAY_TEST_KEY_ID ||
     process.env.RAZORPAY_KEY ||
     process.env.RAZORPAY_API_KEY ||
     process.env.VITE_RAZORPAY_KEY_ID ||
     process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+    process.env.razorpay_key_id ||
     ""
   ).trim();
 
   const keySecret = (
     process.env.RAZORPAY_KEY_SECRET ||
+    process.env.RAZORPAY_TEST_KEY_SECRET ||
     process.env.RAZORPAY_SECRET ||
     process.env.RAZORPAY_API_SECRET ||
+    process.env.razorpay_key_secret ||
     ""
   ).trim();
 
