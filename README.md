@@ -26,16 +26,6 @@ Welcome to **TravelGenie**, an AI-powered travel planning platform designed to r
 - ⚡ **Groq AI Integration:** Ultra-fast LLM itinerary generation and chat response streaming.
 - 🗄️ **MongoDB Atlas & Mongoose 8.x:** Deterministic document ID strategy with zero orphan records and provenance tracking.
 
-## Architecture Overview
-
-```mermaid
-graph TD
-    Client[Next.js App Router (Frontend)] --> |REST API| Server[Express.js Server (Backend)]
-    Server --> |Mongoose ODM| DB[(MongoDB Atlas)]
-    Server --> |Media Uploads| CDN[Cloudinary CDN]
-    Server --> |AI Prompts| AI[Groq Cloud AI]
-```
-*For detailed architecture diagrams, see [ARCHITECTURE.md](ARCHITECTURE.md) and [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md).*
 
 ## Technology Stack
 
